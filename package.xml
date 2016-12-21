@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>orb_slam_2_ros</name>
+  <version>0.0.0</version>
+  <description>
+    Provides a ROS interface for orb slam 2.
+  </description>
+  <url></url>
+  <author>Alex Millane</author>
+  <maintainer email="alex.millane@gmail.com">Alex Millane</maintainer>
+  <license>New BSD</license>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+  <buildtool_depend>catkin_simple</buildtool_depend>
+
+  <!-- Dependencies. -->
+  <depend>roscpp</depend>
+  <depend>cmake_modules</depend>
+  <depend>sensor_msgs</depend>
+  <depend>glog_catkin</depend>
+  <depend>cv_bridge</depend>
+  <depend>orb_slam_2_catkin</depend>
+  <depend>pangolin_catkin</depend>
+
+<!--   <depend>minkindr</depend>
+  <depend>minkindr_conversions</depend>
+ -->
+</package>
