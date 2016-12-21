@@ -37,7 +37,7 @@ class OrbSlam2Interface {
   ros::Subscriber image_sub_;
 
   // The orb slam system
-  ORB_SLAM2::System* slam_system;
+  std::shared_ptr<ORB_SLAM2::System> slam_system_;
 
   // Parameters
   bool verbose_;

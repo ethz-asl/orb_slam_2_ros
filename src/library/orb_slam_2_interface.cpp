@@ -14,9 +14,9 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
   advertiseTopics();
   getParametersFromRos();
   // Creating the SlAM system
-  slam_system =
+  slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
       new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
-                            ORB_SLAM2::System::MONOCULAR, true);
+                            ORB_SLAM2::System::MONOCULAR, true));
 }
 
 void OrbSlam2Interface::subscribeToTopics() {
@@ -47,7 +47,7 @@ void OrbSlam2Interface::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     return;
   }
   // Handing the image to ORB slam for tracking
-  slam_system->TrackMonocular(cv_ptr->image, cv_ptr->header.stamp.toSec());
+  slam_system_->TrackMonocular(cv_ptr->image, cv_ptr->header.stamp.toSec());
 }
 
 }  // namespace orb_slam_2_interface
