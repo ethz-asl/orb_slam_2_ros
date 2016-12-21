@@ -1,5 +1,5 @@
-#include <ros/ros.h>
 #include <glog/logging.h>
+#include <ros/ros.h>
 #include "orb_slam_2_ros/orb_slam_2_interface.hpp"
 
 // Standard C++ entry point

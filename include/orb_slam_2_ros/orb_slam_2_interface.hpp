@@ -1,12 +1,12 @@
 #ifndef ORB_SLAM_2_INTERFACE
 #define ORB_SLAM_2_INTERFACE
 
-#include <string>
 #include <memory>
+#include <string>
 
+#include <orb_slam_2/System.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
-#include <orb_slam_2/System.h>
 
 namespace orb_slam_2_interface {
 
@@ -17,7 +17,8 @@ static const bool kDefaultVerbose = true;
 class OrbSlam2Interface {
  public:
   // Constructor
-  OrbSlam2Interface(const ros::NodeHandle& nh, const ros::NodeHandle& nh_private);
+  OrbSlam2Interface(const ros::NodeHandle& nh,
+                    const ros::NodeHandle& nh_private);
 
  protected:
   // Subscribes and Advertises to the appropriate ROS topics
@@ -42,7 +43,6 @@ class OrbSlam2Interface {
   bool verbose_;
   std::string vocabulary_file_path_;
   std::string settings_file_path_;
-
 };
 
 }  // namespace orb_slam_2_interface
