@@ -22,5 +22,7 @@
   <depend>cv_bridge</depend>
   <depend>orb_slam_2_catkin</depend>
   <depend>pangolin_catkin</depend>
+  <depend>minkindr</depend>
+  <depend>minkindr_conversions</depend>
 
 </package>
