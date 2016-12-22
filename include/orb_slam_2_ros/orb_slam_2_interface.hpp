@@ -11,6 +11,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <Eigen/Geometry>
+#include <tf/transform_broadcaster.h>
 
 namespace orb_slam_2_interface {
 
@@ -27,7 +28,8 @@ struct TransformationStamped {
 */
 // Default values for parameters
 static const bool kDefaultVerbose = true;
-static const std::string kDefaultChildFrameName = "world";
+static const std::string kDefaultFrameId = "world";
+static const std::string kDefaultChildFrameId = "cam0";
 
 // Class handling global alignment calculation and publishing
 class OrbSlam2Interface {
@@ -46,7 +48,9 @@ class OrbSlam2Interface {
   void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 
   // Publishing functions
-  void publishCurrentPose(const Transformation& T, const std_msgs::Header& header);
+  void publishCurrentPose(const Transformation& T,
+                          const std_msgs::Header& header);
+  void publishCurrentPoseAsTF(const ros::TimerEvent& event);
 
   // Helper functions
   void convertOrbSlamPoseToKindr(const cv::Mat& T_cv, Transformation* T_kindr);
@@ -64,9 +68,14 @@ class OrbSlam2Interface {
 
   // Publishers
   ros::Publisher T_pub_;
+  tf::TransformBroadcaster tf_broadcaster_;
+  ros::Timer tf_timer_;
 
   // The orb slam system
   std::shared_ptr<ORB_SLAM2::System> slam_system_;
+
+  // The current pose
+  Transformation T_;
 
   // Parameters
   bool verbose_;
@@ -74,8 +83,8 @@ class OrbSlam2Interface {
   std::string settings_file_path_;
 
   // Transform frame names
-  std::string local_frame_name_;
-
+  std::string frame_id_;
+  std::string child_frame_id_;
 };
 
 }  // namespace orb_slam_2_interface
