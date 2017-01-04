@@ -2,15 +2,14 @@
 <launch>
 
 <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen" >
+  <param name="interface_type" value="mono" />
   <param name="vocabulary_file_path" value="/home/millanea/trunk/datasets/kitti/raw/ORBvoc.txt" />
   <param name="settings_file_path" value="/home/millanea/trunk/datasets/kitti/raw/2011_09_30_drive_18/KITTI00-02.yaml" />
-
   <remap from="camera/image_raw" to="/cam00/image_raw" />
-
 </node>
 
-
-
-
+<node name="rosbag_record" type="record" pkg="rosbag" output="screen"
+  args=" -o /home/millanea/trunk/manifold_mapping/data/kitti/2011_09_30_drive_18/orb_slam_2_output /transform_imu /orb_slam_2_ros_node/transform_cam">
+</node>
 
 </launch>

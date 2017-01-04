@@ -11,6 +11,7 @@ include_directories(${Eigen_INCLUDE_DIRS})
 
 cs_add_library(orb_slam_2_interface
   src/library/orb_slam_2_interface.cpp
+  src/library/orb_slam_2_interface_mono.cpp
 )
 
 cs_add_executable(orb_slam_2_ros_node

@@ -5,27 +5,16 @@
 #include <string>
 
 #include <geometry_msgs/TransformStamped.h>
-#include <kindr/minimal/quat-transformation.h>
-#include <kindr/minimal/rotation-quaternion.h>
 #include <orb_slam_2/System.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
-#include <Eigen/Geometry>
 #include <tf/transform_broadcaster.h>
+#include <Eigen/Geometry>
+
+#include "orb_slam_2_ros/types.hpp"
 
 namespace orb_slam_2_interface {
 
-// Convenience typedef
-typedef kindr::minimal::QuatTransformation Transformation;
-typedef kindr::minimal::RotationQuaternion Quaternion;
-
-// NOT NEEDED FOR NOW.
-/*// Stamped transform type
-struct TransformationStamped {
-  ros::Time stamp;
-  Transformation transformation;
-};
-*/
 // Default values for parameters
 static const bool kDefaultVerbose = true;
 static const std::string kDefaultFrameId = "world";
@@ -64,7 +53,7 @@ class OrbSlam2Interface {
   ros::NodeHandle nh_private_;
 
   // Subscribers
-  ros::Subscriber image_sub_;
+  //ros::Subscriber image_sub_;
 
   // Publishers
   ros::Publisher T_pub_;

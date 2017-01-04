@@ -1,6 +1,5 @@
 #include "orb_slam_2_ros/orb_slam_2_interface.hpp"
 
-#include <cv_bridge/cv_bridge.h>
 #include <glog/logging.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/eigen.hpp>
@@ -27,14 +26,13 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
 }
 
 void OrbSlam2Interface::subscribeToTopics() {
-  // Subscribing to the required data topics
-  image_sub_ = nh_.subscribe("camera/image_raw", 1,
-                             &OrbSlam2Interface::imageCallback, this);
+  // NOTE(alex.millane): There might be topics which all interfaces need access
+  // to.
 }
 
 void OrbSlam2Interface::advertiseTopics() {
   // Advertising topics
-  T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>("T", 1);
+  T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>("transform_cam", 1);
   // Creating a callback timer for TF publisher
   tf_timer_ = nh_.createTimer(ros::Duration(0.01),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);
@@ -46,35 +44,6 @@ void OrbSlam2Interface::getParametersFromRos() {
       << "Please provide the vocabulary_file_path as a ros param.";
   CHECK(nh_private_.getParam("settings_file_path", settings_file_path_))
       << "Please provide the settings_file_path as a ros param.";
-}
-
-void OrbSlam2Interface::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
-  // Copy the ros image message to cv::Mat.
-  cv_bridge::CvImageConstPtr cv_ptr;
-  try {
-    cv_ptr = cv_bridge::toCvShare(msg);
-  } catch (cv_bridge::Exception& e) {
-    ROS_ERROR("cv_bridge exception: %s", e.what());
-    return;
-  }
-
-  // NOTE(alexmillane): On my side of the orb slam interface, correct notation
-  // should be enforced wrt to transformations subscripts. TEST THIS AND LABEL
-  // CORRECTLY.
-
-  // Handing the image to ORB slam for tracking
-  cv::Mat T_cv =
-      slam_system_->TrackMonocular(cv_ptr->image, cv_ptr->header.stamp.toSec());
-
-  // If tracking successfull
-  if (!T_cv.empty()) {
-    // Converting to kindr transform and publishing
-    Transformation T_kindr;
-    convertOrbSlamPoseToKindr(T_cv, &T_kindr);
-    publishCurrentPose(T_kindr, msg->header);
-    // Saving the transform to the member for publishing as a TF
-    T_ = T_kindr;
-  }
 }
 
 void OrbSlam2Interface::publishCurrentPose(const Transformation& T,
