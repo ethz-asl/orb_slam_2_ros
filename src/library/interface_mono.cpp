@@ -1,6 +1,6 @@
 #include <cv_bridge/cv_bridge.h>
 
-#include "orb_slam_2_ros/orb_slam_2_interface_mono.hpp"
+#include "orb_slam_2_ros/interface_mono.hpp"
 
 namespace orb_slam_2_interface {
 
@@ -11,6 +11,10 @@ OrbSlam2InterfaceMono::OrbSlam2InterfaceMono(const ros::NodeHandle& nh,
   subscribeToTopics();
   //advertiseTopics();
   //getParametersFromRos();
+  // Creating the SlAM system
+  slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
+      new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
+                            ORB_SLAM2::System::MONOCULAR, true));
 }
 
 void OrbSlam2InterfaceMono::subscribeToTopics() {

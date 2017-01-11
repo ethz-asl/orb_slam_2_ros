@@ -29,7 +29,6 @@ class OrbSlam2Interface {
 
  protected:
   // Subscribes and Advertises to the appropriate ROS topics
-  void subscribeToTopics();
   void advertiseTopics();
   void getParametersFromRos();
 
@@ -43,10 +42,6 @@ class OrbSlam2Interface {
 
   // Helper functions
   void convertOrbSlamPoseToKindr(const cv::Mat& T_cv, Transformation* T_kindr);
-
-  // DEBUG
-  // TODO(alexmillane): Remove this in a release.
-  std::string type2str(int type);
 
   // Node handles
   ros::NodeHandle nh_;

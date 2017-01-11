@@ -1,4 +1,4 @@
-#include "orb_slam_2_ros/orb_slam_2_interface.hpp"
+#include "orb_slam_2_ros/interface.hpp"
 
 #include <glog/logging.h>
 #include <opencv2/core/core.hpp>
@@ -16,18 +16,8 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
       frame_id_(kDefaultFrameId),
       child_frame_id_(kDefaultChildFrameId) {
   // Getting data and params
-  subscribeToTopics();
   advertiseTopics();
   getParametersFromRos();
-  // Creating the SlAM system
-  slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
-      new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
-                            ORB_SLAM2::System::MONOCULAR, true));
-}
-
-void OrbSlam2Interface::subscribeToTopics() {
-  // NOTE(alex.millane): There might be topics which all interfaces need access
-  // to.
 }
 
 void OrbSlam2Interface::advertiseTopics() {
@@ -44,6 +34,10 @@ void OrbSlam2Interface::getParametersFromRos() {
       << "Please provide the vocabulary_file_path as a ros param.";
   CHECK(nh_private_.getParam("settings_file_path", settings_file_path_))
       << "Please provide the settings_file_path as a ros param.";
+  // Optional params
+  nh_private_.getParam("verbose", verbose_);
+  nh_private_.getParam("frame_id", frame_id_);
+  nh_private_.getParam("child_frame_id", child_frame_id_);
 }
 
 void OrbSlam2Interface::publishCurrentPose(const Transformation& T,
@@ -55,7 +49,7 @@ void OrbSlam2Interface::publishCurrentPose(const Transformation& T,
   // Setting the child and parent frames
   msg.child_frame_id = child_frame_id_;
   // Converting from a minkindr transform to a transform message
-  tf::transformKindrToMsg(T, &msg.transform);
+  tf::transformKindrToMsg(T.inverse(), &msg.transform);
   // Publishing the current transformation.
   T_pub_.publish(msg);
 }
@@ -86,46 +80,6 @@ void OrbSlam2Interface::convertOrbSlamPoseToKindr(const cv::Mat& T_cv,
   Quaternion q_kindr(R);
   Eigen::Vector3d t_kindr(T_eigen_d.block<3, 1>(0, 3));
   *T_kindr = Transformation(q_kindr, t_kindr);
-}
-
-// DEBUG
-std::string OrbSlam2Interface::type2str(int type) {
-  std::string r;
-
-  uchar depth = type & CV_MAT_DEPTH_MASK;
-  uchar chans = 1 + (type >> CV_CN_SHIFT);
-
-  switch (depth) {
-    case CV_8U:
-      r = "8U";
-      break;
-    case CV_8S:
-      r = "8S";
-      break;
-    case CV_16U:
-      r = "16U";
-      break;
-    case CV_16S:
-      r = "16S";
-      break;
-    case CV_32S:
-      r = "32S";
-      break;
-    case CV_32F:
-      r = "32F";
-      break;
-    case CV_64F:
-      r = "64F";
-      break;
-    default:
-      r = "User";
-      break;
-  }
-
-  r += "C";
-  r += (chans + '0');
-
-  return r;
 }
 
 }  // namespace orb_slam_2_interface

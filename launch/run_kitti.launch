@@ -1,15 +1,64 @@
 <?xml version="1.0"?>
 <launch>
+<!--   <arg name="play_bag" value="true" />
+  <arg name="bag_file" value="/home/millanea/trunk/datasets/kitti/raw/2011_09_30_drive_18/bags/sync.bag"/>
+ --> 
+  <arg name="voxel_size" default="0.25"/>
+  <arg name="generate_esdf" default="false" />
 
-<node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen" >
-  <param name="interface_type" value="mono" />
-  <param name="vocabulary_file_path" value="/home/millanea/trunk/datasets/kitti/raw/ORBvoc.txt" />
-  <param name="settings_file_path" value="/home/millanea/trunk/datasets/kitti/raw/2011_09_30_drive_18/KITTI00-02.yaml" />
-  <remap from="camera/image_raw" to="/cam00/image_raw" />
-</node>
+<!--   <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen" >
+    <param name="interface_type" value="stereo" />
+    <param name="vocabulary_file_path" value="/home/millanea/trunk/datasets/kitti/raw/ORBvoc.txt" />
+    <param name="settings_file_path" value="/home/millanea/trunk/datasets/kitti/raw/2011_09_30_drive_18/KITTI00-02_stereo.yaml" />
+    <remap from="camera/left/image_raw" to="/cam00/image_raw" />
+    <remap from="camera/right/image_raw" to="/cam01/image_raw" />
+  </node> -->
 
-<node name="rosbag_record" type="record" pkg="rosbag" output="screen"
-  args=" -o /home/millanea/trunk/manifold_mapping/data/kitti/2011_09_30_drive_18/orb_slam_2_output /transform_imu /orb_slam_2_ros_node/transform_cam">
-</node>
+<!--   <remap from="camera/image_raw" to="/cam00/image_raw" /> -->
+<!--   <param name="settings_file_path" value="/home/millanea/trunk/datasets/kitti/raw/2011_09_30_drive_18/KITTI00-02.yaml" />
+ -->
+
+<!--   <node name="rosbag_record" type="record" pkg="rosbag" output="screen"
+    args=" -o /home/millanea/trunk/manifold_mapping/data/kitti/2011_09_30_drive_18/orb_slam_2_output /transform_imu /orb_slam_2_ros_node/transform_cam">
+  </node> -->
+
+   <!-- Run stereo_dense_reconstruction_node-->
+<!--   <node ns="stereo_gray" name="stereo_image_proc" pkg="stereo_image_proc" type="stereo_image_proc" clear_params="true" output="screen">
+    <remap from="left/image_raw" to="/cam02/image_raw" />
+    <remap from="left/camera_info" to="/cam02/camera_info" />
+    <remap from="right/image_raw" to="/cam03/image_raw" />
+    <remap from="right/camera_info" to="/cam03/camera_info" />
+    <param name="approximate_sync" value="true" />
+    <param name="approximate_sync" value="true" />
+    <rosparam file="$(find voxblox_ros)/cfg/stereo/kitti_stereo_jager.yaml"/>
+  </node> -->
+
+   <!-- Run stereo_dense_reconstruction_node-->
+  <node ns="stereo_gray" name="stereo_image_proc" pkg="stereo_image_proc" type="stereo_image_proc" clear_params="true" output="screen">
+    <remap from="left/image_raw" to="/cam00/image_raw" />
+    <remap from="left/camera_info" to="/cam00/camera_info" />
+    <remap from="right/image_raw" to="/cam01/image_raw" />
+    <remap from="right/camera_info" to="/cam01/camera_info" />
+    <param name="approximate_sync" value="true" />
+    <rosparam file="$(find voxblox_ros)/cfg/stereo/kitti_stereo_jager.yaml"/>
+  </node>
+
+  <node name="voxblox_node" pkg="voxblox_ros" type="voxblox_node" output="screen" args="-alsologtostderr" clear_params="true">
+    <remap from="pointcloud" to="/stereo_gray/points2"/>
+    <param name="tsdf_voxel_size" value="$(arg voxel_size)" />
+    <param name="tsdf_voxels_per_side" value="16" />
+    <param name="voxel_carving_enabled" value="true" />
+    <param name="color_mode" value="color" />
+    <param name="use_tf_transforms" value="true" />
+    <param name="verbose" value="true" />
+    <param name="generate_esdf" value="$(arg generate_esdf)" />
+    <param name="update_mesh_every_n_sec" value="10.0" /> <!-- 0.2 -->
+    <param name="max_ray_length_m" value="20.0" />
+    <param name="min_time_between_msgs_sec" value="0.2" />
+    <param name="slice_level" value="1.0" />
+    <param name="method" value="merged_discard" />
+    <param name="use_const_weight" value="true" />
+    <param name="mesh_filename" value="/home/millanea/trunk/manifold_mapping/data/kitti/drive_18/voxblox/mesh.ply" />
+  </node>
 
 </launch>
