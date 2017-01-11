@@ -32,23 +32,18 @@ void OrbSlam2InterfaceMono::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
   }
-
-  // NOTE(alexmillane): On my side of the orb slam interface, correct notation
-  // should be enforced wrt to transformations subscripts. TEST THIS AND LABEL
-  // CORRECTLY.
-
   // Handing the image to ORB slam for tracking
-  cv::Mat T_cv =
+  cv::Mat T_C_W_opencv =
       slam_system_->TrackMonocular(cv_ptr->image, cv_ptr->header.stamp.toSec());
-
   // If tracking successfull
-  if (!T_cv.empty()) {
+  if (!T_C_W_opencv.empty()) {
     // Converting to kindr transform and publishing
-    Transformation T_kindr;
-    convertOrbSlamPoseToKindr(T_cv, &T_kindr);
-    publishCurrentPose(T_kindr, msg->header);
+    Transformation T_C_W, T_W_C;
+    convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W);
+    T_W_C = T_C_W.inverse();
+    publishCurrentPose(T_W_C, msg->header);
     // Saving the transform to the member for publishing as a TF
-    T_ = T_kindr;
+    T_W_C_ = T_W_C;
   }
 }
 

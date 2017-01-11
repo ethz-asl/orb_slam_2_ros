@@ -5,15 +5,17 @@
 #include <sensor_msgs/Image.h>
 
 #include <message_filters/subscriber.h>
-#include <message_filters/time_synchronizer.h>
 #include <message_filters/sync_policies/approximate_time.h>
+#include <message_filters/time_synchronizer.h>
 
 #include "orb_slam_2_ros/interface.hpp"
 
 namespace orb_slam_2_interface {
 
 // The synchronization policy used by the interface to sync stereo images
-typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image, sensor_msgs::Image> sync_pol;
+typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
+                                                        sensor_msgs::Image>
+    sync_pol;
 
 // Class handling global alignment calculation and publishing
 class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
@@ -34,7 +36,6 @@ class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> left_sub_;
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> right_sub_;
   std::shared_ptr<message_filters::Synchronizer<sync_pol>> sync_;
-
 };
 
 }  // namespace orb_slam_2_interface

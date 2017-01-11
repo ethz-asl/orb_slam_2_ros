@@ -1,10 +1,10 @@
 #include "orb_slam_2_ros/interface.hpp"
 
 #include <glog/logging.h>
-#include <opencv2/core/core.hpp>
-#include <opencv2/core/eigen.hpp>
 #include <minkindr_conversions/kindr_msg.h>
 #include <minkindr_conversions/kindr_tf.h>
+#include <opencv2/core/core.hpp>
+#include <opencv2/core/eigen.hpp>
 
 namespace orb_slam_2_interface {
 
@@ -22,7 +22,8 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
 
 void OrbSlam2Interface::advertiseTopics() {
   // Advertising topics
-  T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>("transform_cam", 1);
+  T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>(
+      "transform_cam", 1);
   // Creating a callback timer for TF publisher
   tf_timer_ = nh_.createTimer(ros::Duration(0.01),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);
@@ -49,14 +50,14 @@ void OrbSlam2Interface::publishCurrentPose(const Transformation& T,
   // Setting the child and parent frames
   msg.child_frame_id = child_frame_id_;
   // Converting from a minkindr transform to a transform message
-  tf::transformKindrToMsg(T.inverse(), &msg.transform);
+  tf::transformKindrToMsg(T, &msg.transform);
   // Publishing the current transformation.
   T_pub_.publish(msg);
 }
 
 void OrbSlam2Interface::publishCurrentPoseAsTF(const ros::TimerEvent& event) {
   tf::Transform tf_transform;
-  tf::transformKindrToTF(T_, &tf_transform);
+  tf::transformKindrToTF(T_W_C_, &tf_transform);
   tf_broadcaster_.sendTransform(tf::StampedTransform(
       tf_transform, ros::Time::now(), frame_id_, child_frame_id_));
 }

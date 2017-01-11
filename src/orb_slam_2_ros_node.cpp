@@ -23,6 +23,7 @@ std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> create_interface(
   } else {
     ROS_FATAL(
         "interface type not recognized. Must be mono or stereo.");
+    ros::shutdown();
     exit(1);
   }
   // Returning a pointer to the frame aligner

@@ -1,5 +1,0 @@
-<?xml version="1.0"?>
-<launch>
-  <arg name="bag_file" value="/home/millanea/trunk/datasets/kitti/raw/2011_09_30_drive_18/bags/sync.bag"/>
-  <node name="player" pkg="rosbag" type="play" output="screen" args=" -r 0.2 --clock $(arg bag_file)"/>
-</launch>

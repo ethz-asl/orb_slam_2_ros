@@ -47,9 +47,6 @@ class OrbSlam2Interface {
   ros::NodeHandle nh_;
   ros::NodeHandle nh_private_;
 
-  // Subscribers
-  //ros::Subscriber image_sub_;
-
   // Publishers
   ros::Publisher T_pub_;
   tf::TransformBroadcaster tf_broadcaster_;
@@ -59,7 +56,7 @@ class OrbSlam2Interface {
   std::shared_ptr<ORB_SLAM2::System> slam_system_;
 
   // The current pose
-  Transformation T_;
+  Transformation T_W_C_;
 
   // Parameters
   bool verbose_;
