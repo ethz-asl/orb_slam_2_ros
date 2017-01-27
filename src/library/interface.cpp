@@ -62,6 +62,15 @@ void OrbSlam2Interface::publishCurrentPoseAsTF(const ros::TimerEvent& event) {
       tf_transform, ros::Time::now(), frame_id_, child_frame_id_));
 }
 
+void OrbSlam2Interface::publishTrajectory() {
+  // Getting the latest trajectory
+  std::vector<Eigen::Affine3d> trajectory = slam_system_->GetUpdatedTrajectory();
+
+  // UP TO HERE.
+  // CONVERT TO MESSAGES AND PUBLISH.
+
+}
+
 void OrbSlam2Interface::convertOrbSlamPoseToKindr(const cv::Mat& T_cv,
                                                   Transformation* T_kindr) {
   // Argument checks

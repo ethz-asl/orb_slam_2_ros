@@ -3,6 +3,7 @@
 
 #include <memory>
 #include <string>
+#include <vector>
 
 #include <geometry_msgs/TransformStamped.h>
 #include <orb_slam_2/System.h>
@@ -35,10 +36,11 @@ class OrbSlam2Interface {
   // Callbacks
   void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 
-  // Publishing functions
+  // Pose Publishing functions
   void publishCurrentPose(const Transformation& T,
                           const std_msgs::Header& header);
   void publishCurrentPoseAsTF(const ros::TimerEvent& event);
+  void publishTrajectory();
 
   // Helper functions
   void convertOrbSlamPoseToKindr(const cv::Mat& T_cv, Transformation* T_kindr);
