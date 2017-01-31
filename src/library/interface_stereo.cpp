@@ -12,6 +12,9 @@ OrbSlam2InterfaceStereo::OrbSlam2InterfaceStereo(
   slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
       new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
                             ORB_SLAM2::System::STEREO, true));
+  // Starting thread to publish loop closure trajectories
+  mpt_loop_closure_publisher =
+      new thread(&OrbSlam2InterfaceStereo::runPublishUpdatedTrajectory, this);
 }
 
 void OrbSlam2InterfaceStereo::subscribeToTopics() {
@@ -43,11 +46,6 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
   performTracking(cv_ptr_left, cv_ptr_right);
   // Publishing results
   publishCurrentPose(T_W_C_, msg_left->header);
-
-  // Check if updates to the past trajectory are available
-  if (slam_system_->isUpdatedTrajectoryAvailable()) {
-    publishTrajectory();
-  }
 }
 
 // Performs tracking given the current frames
