@@ -48,7 +48,24 @@ void OrbSlam2Interface::runPublishUpdatedTrajectory() {
       // DEBUG
       std::cout << "Updated trajectory available. Publishing." << std::endl;
       std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d> >
-          T_C_W_trajectory = slam_system_->GetUpdatedTrajectory();
+          T_C_W_trajectory_unnormalized = slam_system_->GetUpdatedTrajectory();
+      // Normalizing the transformations before publishing
+      std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d> >
+          T_C_W_trajectory;
+      for (auto T_C_W_unnormalized = T_C_W_trajectory_unnormalized.begin();
+           T_C_W_unnormalized != T_C_W_trajectory_unnormalized.end();
+           T_C_W_unnormalized++) {
+        // Extracting and normalizing the rotation matrix
+        Eigen::Matrix3d R_C_W_unnormalized = T_C_W_unnormalized->rotation();
+        Eigen::AngleAxisd aa(R_C_W_unnormalized);
+        Eigen::Matrix3d R_C_W = aa.toRotationMatrix();
+        // Inserting the normalized matrix into the transform
+        Eigen::Affine3d T_C_W(*T_C_W_unnormalized);
+        T_C_W.linear() = R_C_W;
+        // Pushing this onto the normalized trajectory
+        T_C_W_trajectory.push_back(T_C_W);
+      }
+      // Publishing
       publishTrajectory(T_C_W_trajectory);
     }
     usleep(5000);
@@ -109,6 +126,9 @@ void OrbSlam2Interface::publishTrajectory(
   for (size_t pose_index = 0; pose_index < T_C_W_trajectory.size();
        pose_index++) {
     Eigen::Affine3d T_C_W = T_C_W_trajectory[pose_index];
+    // TODO(alexmillane): This is the wrong place for the inverse. Move it to
+    // the extraction function... Also rename the publisher. Gotta go to bed
+    // right now.
     Eigen::Affine3d T_W_C = T_C_W.inverse();
     geometry_msgs::Pose pose_msg;
     tf::poseEigenToMsg(T_W_C, pose_msg);

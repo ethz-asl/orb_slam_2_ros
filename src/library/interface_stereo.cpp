@@ -41,7 +41,6 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
   cv_bridge::CvImageConstPtr cv_ptr_left;
   cv_bridge::CvImageConstPtr cv_ptr_right;
   convertFrames(msg_left, msg_right, cv_ptr_left, cv_ptr_right);
-
   // Performing tracking using the frames
   performTracking(cv_ptr_left, cv_ptr_right);
   // Publishing results
