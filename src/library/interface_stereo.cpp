@@ -47,7 +47,6 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
   publishCurrentPose(T_W_C_, msg_left->header);
 }
 
-// Performs tracking given the current frames
 void OrbSlam2InterfaceStereo::performTracking(
     const cv_bridge::CvImageConstPtr cv_ptr_left,
     const cv_bridge::CvImageConstPtr cv_ptr_right) {
@@ -65,7 +64,6 @@ void OrbSlam2InterfaceStereo::performTracking(
     T_W_C_ = T_W_C;
   }
 }
-
 
 void OrbSlam2InterfaceStereo::convertFrames(
     const sensor_msgs::ImageConstPtr& msg_left,
