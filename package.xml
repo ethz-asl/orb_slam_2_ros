@@ -13,6 +13,7 @@
   <!-- Dependencies which this package needs to build itself. -->
   <buildtool_depend>catkin</buildtool_depend>
   <buildtool_depend>catkin_simple</buildtool_depend>
+  <buildtool_depend>message_generation</buildtool_depend>
 
   <!-- Dependencies. -->
   <depend>roscpp</depend>
@@ -25,5 +26,6 @@
   <depend>pangolin_catkin</depend>
   <depend>minkindr</depend>
   <depend>minkindr_conversions</depend>
+  <depend>message_runtime</depend>
 
 </package>

@@ -1,16 +1,17 @@
+#include <unistd.h>
 #include <thread>
 
 #include <eigen_conversions/eigen_msg.h>
 #include <geometry_msgs/Pose.h>
 #include <geometry_msgs/PoseArray.h>
+#include <geometry_msgs/TransformStamped.h>
 #include <glog/logging.h>
 #include <minkindr_conversions/kindr_msg.h>
 #include <minkindr_conversions/kindr_tf.h>
 #include <opencv2/core/core.hpp>
 #include <opencv2/core/eigen.hpp>
 
-#include <unistd.h>
-
+#include "orb_slam_2_ros/TransformStampedArray.h"
 #include "orb_slam_2_ros/interface.hpp"
 
 namespace orb_slam_2_interface {
@@ -47,26 +48,65 @@ void OrbSlam2Interface::runPublishUpdatedTrajectory() {
     if (slam_system_->isUpdatedTrajectoryAvailable()) {
       // DEBUG
       std::cout << "Updated trajectory available. Publishing." << std::endl;
-      std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d> >
-          T_C_W_trajectory_unnormalized = slam_system_->GetUpdatedTrajectory();
-      // Normalizing the transformations before publishing
-      std::vector<Eigen::Affine3d, Eigen::aligned_allocator<Eigen::Affine3d> >
-          T_C_W_trajectory;
-      for (auto T_C_W_unnormalized = T_C_W_trajectory_unnormalized.begin();
-           T_C_W_unnormalized != T_C_W_trajectory_unnormalized.end();
-           T_C_W_unnormalized++) {
-        // Extracting and normalizing the rotation matrix
-        Eigen::Matrix3d R_C_W_unnormalized = T_C_W_unnormalized->rotation();
-        Eigen::AngleAxisd aa(R_C_W_unnormalized);
-        Eigen::Matrix3d R_C_W = aa.toRotationMatrix();
-        // Inserting the normalized matrix into the transform
-        Eigen::Affine3d T_C_W(*T_C_W_unnormalized);
-        T_C_W.linear() = R_C_W;
-        // Pushing this onto the normalized trajectory
-        T_C_W_trajectory.push_back(T_C_W);
+      /*      // Getting the trajectory from orb slam
+            std::vector<Eigen::Affine3d,
+         Eigen::aligned_allocator<Eigen::Affine3d> >
+                T_C_W_trajectory_unnormalized =
+         slam_system_->GetUpdatedTrajectory();*/
+      std::vector<std::pair<cv::Mat, double>> T_C_W_trajectory_unnormalized =
+          slam_system_->GetUpdatedTrajectory();
+
+      // NEW MESSAGE TYPE
+
+      // Converting to kindr transforms
+      // geometry_msgs::PoseArray pose_array_msg;
+      orb_slam_2_ros::TransformStampedArray transform_stamped_array_msg;
+      for (auto i_T_C_W_stamped_cv = T_C_W_trajectory_unnormalized.begin();
+           i_T_C_W_stamped_cv != T_C_W_trajectory_unnormalized.end();
+           i_T_C_W_stamped_cv++) {
+        // Converting to minkindr
+        Transformation T_C_W;
+        convertOrbSlamPoseToKindr(i_T_C_W_stamped_cv->first, &T_C_W);
+        // Inverting for the proper direction
+        Transformation T_W_C = T_C_W.inverse();
+        // Converting to a pose message
+        geometry_msgs::Pose T_W_C_msg;
+        tf::poseKindrToMsg(T_W_C, &T_W_C_msg);
+        // Pushing this onto the pose array message
+        // pose_array_msg.poses.push_back(T_W_C_msg);
+
+        // Converting to a transform stamped message
+        geometry_msgs::TransformStamped T_W_C_msg_2;
+        T_W_C_msg_2.header.stamp = ros::Time(i_T_C_W_stamped_cv->second);
+        tf::transformKindrToMsg(T_W_C, &T_W_C_msg_2.transform);
+        // Pushing this onto the transform stamped array
+        transform_stamped_array_msg.transforms.push_back(T_W_C_msg_2);
       }
       // Publishing
-      publishTrajectory(T_C_W_trajectory);
+      // trajectory_pub_.publish(pose_array_msg);
+      trajectory_pub_.publish(transform_stamped_array_msg);
+
+      /*      // Normalizing the transformations before publishing
+            std::vector<Eigen::Affine3d,
+         Eigen::aligned_allocator<Eigen::Affine3d> >
+                T_C_W_trajectory;
+            for (auto T_C_W_unnormalized =
+         T_C_W_trajectory_unnormalized.begin();
+                 T_C_W_unnormalized != T_C_W_trajectory_unnormalized.end();
+                 T_C_W_unnormalized++) {
+              // Extracting and normalizing the rotation matrix
+              Eigen::Matrix3d R_C_W_unnormalized =
+         T_C_W_unnormalized->rotation();
+              Eigen::AngleAxisd aa(R_C_W_unnormalized);
+              Eigen::Matrix3d R_C_W = aa.toRotationMatrix();
+              // Inserting the normalized matrix into the transform
+              Eigen::Affine3d T_C_W(*T_C_W_unnormalized);
+              T_C_W.linear() = R_C_W;
+              // Pushing this onto the normalized trajectory
+              T_C_W_trajectory.push_back(T_C_W);
+            }
+            // Publishing
+            publishTrajectory(T_C_W_trajectory);*/
     }
     usleep(5000);
   }
@@ -76,8 +116,13 @@ void OrbSlam2Interface::advertiseTopics() {
   // Advertising topics
   T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>(
       "transform_cam", 1);
+  /*  trajectory_pub_ =
+        nh_private_.advertise<geometry_msgs::PoseArray>("trajectory_cam", 1);
+  */
   trajectory_pub_ =
-      nh_private_.advertise<geometry_msgs::PoseArray>("trajectory_cam", 1);
+      nh_private_.advertise<orb_slam_2_ros::TransformStampedArray>(
+          "trajectory_cam", 1);
+
   // Creating a callback timer for TF publisher
   tf_timer_ = nh_.createTimer(ros::Duration(0.01),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);
@@ -119,7 +164,7 @@ void OrbSlam2Interface::publishCurrentPoseAsTF(const ros::TimerEvent& event) {
 
 void OrbSlam2Interface::publishTrajectory(
     const std::vector<Eigen::Affine3d,
-                      Eigen::aligned_allocator<Eigen::Affine3d> >&
+                      Eigen::aligned_allocator<Eigen::Affine3d>>&
         T_C_W_trajectory) {
   // Populating the pose array
   geometry_msgs::PoseArray pose_array_msg;
