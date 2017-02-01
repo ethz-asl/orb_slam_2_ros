@@ -1,19 +1,20 @@
-#include <cv_bridge/cv_bridge.h>
-
 #include "orb_slam_2_ros/interface_stereo.hpp"
 
 namespace orb_slam_2_interface {
 
-OrbSlam2InterfaceStereo::OrbSlam2InterfaceStereo(const ros::NodeHandle& nh,
-                                             const ros::NodeHandle& nh_private)
+OrbSlam2InterfaceStereo::OrbSlam2InterfaceStereo(
+    const ros::NodeHandle& nh, const ros::NodeHandle& nh_private)
     : OrbSlam2Interface(nh, nh_private) {
   // Getting data and params
   subscribeToTopics();
-  //advertiseTopics();
-  //getParametersFromRos();
+  // advertiseTopics();
+  // getParametersFromRos();
   slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
       new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
                             ORB_SLAM2::System::STEREO, true));
+  // Starting thread to publish loop closure trajectories
+  mpt_loop_closure_publisher =
+      new thread(&OrbSlam2InterfaceStereo::runPublishUpdatedTrajectory, this);
 }
 
 void OrbSlam2InterfaceStereo::subscribeToTopics() {
@@ -36,21 +37,19 @@ void OrbSlam2InterfaceStereo::subscribeToTopics() {
 void OrbSlam2InterfaceStereo::stereoImageCallback(
     const sensor_msgs::ImageConstPtr& msg_left,
     const sensor_msgs::ImageConstPtr& msg_right) {
-  // Copy the ros image message to cv::Mat.
+  // Converting to OpenCV frames
   cv_bridge::CvImageConstPtr cv_ptr_left;
-  try {
-    cv_ptr_left = cv_bridge::toCvShare(msg_left);
-  } catch (cv_bridge::Exception& e) {
-    ROS_ERROR("cv_bridge exception: %s", e.what());
-    return;
-  }
   cv_bridge::CvImageConstPtr cv_ptr_right;
-  try {
-    cv_ptr_right = cv_bridge::toCvShare(msg_right);
-  } catch (cv_bridge::Exception& e) {
-    ROS_ERROR("cv_bridge exception: %s", e.what());
-    return;
-  }
+  convertFrames(msg_left, msg_right, cv_ptr_left, cv_ptr_right);
+  // Performing tracking using the frames
+  performTracking(cv_ptr_left, cv_ptr_right);
+  // Publishing results
+  publishCurrentPose(T_W_C_, msg_left->header);
+}
+
+void OrbSlam2InterfaceStereo::performTracking(
+    const cv_bridge::CvImageConstPtr cv_ptr_left,
+    const cv_bridge::CvImageConstPtr cv_ptr_right) {
   // Handing the image to ORB slam for tracking
   cv::Mat T_C_W_opencv =
       slam_system_->TrackStereo(cv_ptr_left->image, cv_ptr_right->image,
@@ -61,11 +60,29 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
     Transformation T_C_W, T_W_C;
     convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W);
     T_W_C = T_C_W.inverse();
-    publishCurrentPose(T_W_C, msg_left->header);
     // Saving the transform to the member for publishing as a TF
     T_W_C_ = T_W_C;
   }
+}
 
+void OrbSlam2InterfaceStereo::convertFrames(
+    const sensor_msgs::ImageConstPtr& msg_left,
+    const sensor_msgs::ImageConstPtr& msg_right,
+    cv_bridge::CvImageConstPtr& cv_ptr_left,
+    cv_bridge::CvImageConstPtr& cv_ptr_right) {
+  // Copy the ros image message to cv::Mat.
+  try {
+    cv_ptr_left = cv_bridge::toCvShare(msg_left);
+  } catch (cv_bridge::Exception& e) {
+    ROS_ERROR("cv_bridge exception: %s", e.what());
+    return;
+  }
+  try {
+    cv_ptr_right = cv_bridge::toCvShare(msg_right);
+  } catch (cv_bridge::Exception& e) {
+    ROS_ERROR("cv_bridge exception: %s", e.what());
+    return;
+  }
 }
 
 }  // namespace orb_slam_2_interface

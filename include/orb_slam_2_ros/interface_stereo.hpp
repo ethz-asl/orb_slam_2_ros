@@ -1,6 +1,7 @@
 #ifndef ORB_SLAM_2_INTERFACE_STEREO
 #define ORB_SLAM_2_INTERFACE_STEREO
 
+#include <cv_bridge/cv_bridge.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 
@@ -31,6 +32,16 @@ class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
   // Callbacks
   void stereoImageCallback(const sensor_msgs::ImageConstPtr& msg_left,
                            const sensor_msgs::ImageConstPtr& msg_right);
+
+  // Performs tracking given the current frames
+  void performTracking(cv_bridge::CvImageConstPtr cv_ptr_left,
+                       cv_bridge::CvImageConstPtr cv_ptr_right);
+
+  // Convert frames from msgs to OpenCV format
+  void convertFrames(const sensor_msgs::ImageConstPtr& msg_left,
+                     const sensor_msgs::ImageConstPtr& msg_right,
+                     cv_bridge::CvImageConstPtr& cv_ptr_left,
+                     cv_bridge::CvImageConstPtr& cv_ptr_right);
 
   // Subscribers
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> left_sub_;
