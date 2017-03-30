@@ -20,10 +20,10 @@ void OrbSlam2InterfaceStereo::subscribeToTopics() {
   // Subscribing to the stereo images
   left_sub_ = std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>>(
       new message_filters::Subscriber<sensor_msgs::Image>(
-          nh_, "camera/left/image_raw", 1));
+          nh_, "cam0/image_raw", 1));
   right_sub_ = std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>>(
       new message_filters::Subscriber<sensor_msgs::Image>(
-          nh_, "camera/right/image_raw", 1));
+          nh_, "cam1/image_raw", 1));
   // Creating a synchronizer
   sync_ = std::shared_ptr<message_filters::Synchronizer<sync_pol>>(
       new message_filters::Synchronizer<sync_pol>(sync_pol(10), *left_sub_,
