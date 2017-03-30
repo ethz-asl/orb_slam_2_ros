@@ -8,6 +8,10 @@
 #include <message_filters/sync_policies/approximate_time.h>
 #include <message_filters/time_synchronizer.h>
 
+#include <opencv2/core/core.hpp>
+
+#include <string>
+
 #include "orb_slam_2_ros/interface.hpp"
 
 namespace orb_slam_2_interface {
@@ -32,10 +36,17 @@ class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
   void stereoImageCallback(const sensor_msgs::ImageConstPtr& msg_left,
                            const sensor_msgs::ImageConstPtr& msg_right);
 
+  bool stereoRectification();
+
   // Subscribers
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> left_sub_;
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> right_sub_;
   std::shared_ptr<message_filters::Synchronizer<sync_pol>> sync_;
+  std::string settings_file_path;
+
+  cv::Mat M1l,M2l,M1r,M2r;
+
+
 };
 
 }  // namespace orb_slam_2_interface

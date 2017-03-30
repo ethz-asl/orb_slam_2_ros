@@ -27,6 +27,9 @@ class OrbSlam2Interface {
   OrbSlam2Interface(const ros::NodeHandle& nh,
                     const ros::NodeHandle& nh_private);
 
+  virtual bool stereoRectification()
+  { return false; }
+
  protected:
   // Subscribes and Advertises to the appropriate ROS topics
   void advertiseTopics();

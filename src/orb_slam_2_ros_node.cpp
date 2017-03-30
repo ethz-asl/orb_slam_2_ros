@@ -20,6 +20,14 @@ std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> create_interface(
   } else if (interface_type == "stereo") {
     interface = std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface>(
         new orb_slam_2_interface::OrbSlam2InterfaceStereo(nh, nh_private));
+
+    if(!interface->stereoRectification())
+    {
+      ROS_FATAL("Stereo rectification failed");
+      ros::shutdown();
+      exit(1);
+    }
+
   } else {
     ROS_FATAL(
         "interface type not recognized. Must be mono or stereo.");
@@ -46,8 +54,10 @@ int main(int argc, char** argv) {
   // Creating the interface object to do the work
   std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> interface =
       create_interface(interface_type, nh, nh_private);
-  // Spinning
+
   ros::spin();
+  // Spinning
+ 
   // Exit tranquilly
   return 0;
 }
