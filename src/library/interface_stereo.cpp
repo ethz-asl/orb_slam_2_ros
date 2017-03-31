@@ -13,7 +13,7 @@ OrbSlam2InterfaceStereo::OrbSlam2InterfaceStereo(const ros::NodeHandle& nh,
   //getParametersFromRos();
   slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
       new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
-                            ORB_SLAM2::System::STEREO, true));
+                            ORB_SLAM2::System::STEREO, false));
 }
 
 void OrbSlam2InterfaceStereo::subscribeToTopics() {
