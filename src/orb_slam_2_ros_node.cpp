@@ -8,6 +8,8 @@
 #include "orb_slam_2_ros/interface_mono.hpp"
 #include "orb_slam_2_ros/interface_stereo.hpp"
 
+#define IMPLEMENT_PRE_PROCESSING true
+
 // A factory method for creating an interface
 std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> create_interface(
     std::string interface_type, const ros::NodeHandle& nh,
@@ -17,13 +19,19 @@ std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> create_interface(
   if (interface_type == "mono") {
     interface = std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface>(
         new orb_slam_2_interface::OrbSlam2InterfaceMono(nh, nh_private));
+    if(!interface->imagePreProcessing() && IMPLEMENT_PRE_PROCESSING)
+    {
+      ROS_FATAL("Mono pre processing failed");
+      ros::shutdown();
+      exit(1);
+    }
+
   } else if (interface_type == "stereo") {
     interface = std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface>(
         new orb_slam_2_interface::OrbSlam2InterfaceStereo(nh, nh_private));
-
-    if(!interface->stereoRectification())
+    if(!interface->imagePreProcessing() && IMPLEMENT_PRE_PROCESSING)
     {
-      ROS_FATAL("Stereo rectification failed");
+      ROS_FATAL("Stereo pre processing failed");
       ros::shutdown();
       exit(1);
     }
@@ -40,6 +48,7 @@ std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> create_interface(
 
 // Standard C++ entry point
 int main(int argc, char** argv) {
+  
   // Starting the logging
   google::InitGoogleLogging(argv[0]);
   // Announce this program to the ROS master
@@ -47,14 +56,15 @@ int main(int argc, char** argv) {
   // Creating the node handles
   ros::NodeHandle nh;
   ros::NodeHandle nh_private("~");
+  
   // Get the parameter describing the interface type
   static const std::string kDefaultInterfaceType = "mono";
   std::string interface_type = kDefaultInterfaceType;
   nh_private.getParam("interface_type", interface_type);
+  
   // Creating the interface object to do the work
   std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> interface =
       create_interface(interface_type, nh, nh_private);
-
   ros::spin();
   // Spinning
  

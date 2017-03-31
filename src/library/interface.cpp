@@ -14,8 +14,10 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
       nh_private_(nh_private),
       verbose_(kDefaultVerbose),
       frame_id_(kDefaultFrameId),
-      child_frame_id_(kDefaultChildFrameId) {
+      child_frame_id_(kDefaultChildFrameId){
   // Getting data and params
+  got_body_transform_ = false;
+  //nh_private.getParam("settings_file_path", settings_file_path_);
   advertiseTopics();
   getParametersFromRos();
 }
@@ -23,7 +25,7 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
 void OrbSlam2Interface::advertiseTopics() {
   // Advertising topics
   T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>(
-      "transform_cam", 1);
+      "vi_orb_slam", 1);
   // Creating a callback timer for TF publisher
   tf_timer_ = nh_.createTimer(ros::Duration(0.01),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);
@@ -57,7 +59,7 @@ void OrbSlam2Interface::publishCurrentPose(const Transformation& T,
 
 void OrbSlam2Interface::publishCurrentPoseAsTF(const ros::TimerEvent& event) {
   tf::Transform tf_transform;
-  tf::transformKindrToTF(T_W_C_, &tf_transform);
+  tf::transformKindrToTF(T_B_C_, &tf_transform);
   tf_broadcaster_.sendTransform(tf::StampedTransform(
       tf_transform, ros::Time::now(), frame_id_, child_frame_id_));
 }

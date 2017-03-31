@@ -6,9 +6,7 @@ namespace orb_slam_2_interface {
 
 OrbSlam2InterfaceStereo::OrbSlam2InterfaceStereo(const ros::NodeHandle& nh,
                                              const ros::NodeHandle& nh_private)
-    : OrbSlam2Interface(nh, nh_private) {
-
-  nh_private.getParam("settings_file_path", settings_file_path);
+    : OrbSlam2Interface(nh, nh_private),stereo_rectified_(false) {
   // Getting data and params
   subscribeToTopics();
   advertiseTopics();
@@ -32,21 +30,36 @@ void OrbSlam2InterfaceStereo::subscribeToTopics() {
                                                   *right_sub_));
   // Registering the synchronized image callback
   sync_->registerCallback(
-      boost::bind(&OrbSlam2InterfaceStereo::stereoImageCallback, this, _1, _2))
+      boost::bind(&OrbSlam2InterfaceStereo::stereoImageCallback, this, _1, _2));
 
 }
 
-bool OrbSlam2InterfaceStereo::stereoRectification()
+bool OrbSlam2InterfaceStereo::getBodyTransform(cv::FileStorage &fsSettings)
+{
+  cv::Mat T_C0_B;
+  Transformation T_C_B;
+
+  fsSettings["T_c0_imu0"] >> T_C0_B;
+  convertOrbSlamPoseToKindr(T_C0_B, &T_C_B);
+  T_B_C_ = T_C_B.inverse();
+
+  got_body_transform_ = true;
+}
+
+bool OrbSlam2InterfaceStereo::imagePreProcessing()
 {
     // Load settings related to stereo calibration
-    cv::FileStorage fsSettings(settings_file_path, cv::FileStorage::READ);
+    cv::FileStorage fsSettings(settings_file_path_, cv::FileStorage::READ);
     if(!fsSettings.isOpened())
     {
         ROS_ERROR("ERROR: Wrong path to settings");
         return false;
     }
 
-    cv::Mat K_l, K_r, P_l, P_r, R_l, R_r, D_l, D_r, T_c0c1, Q_;
+    getBodyTransform(fsSettings);
+
+    cv::Mat K_l, K_r, P_l, P_r, R_l, R_r, D_l, D_r, T_C0_1C, Q_;
+
     fsSettings["LEFT.K"] >> K_l;
     fsSettings["RIGHT.K"] >> K_r;
 
@@ -59,7 +72,7 @@ bool OrbSlam2InterfaceStereo::stereoRectification()
     fsSettings["LEFT.D"] >> D_l;
     fsSettings["RIGHT.D"] >> D_r;
 
-    fsSettings["T_c0_c1"] >> T_c0c1;
+    fsSettings["T_c0_c1"] >> T_C0_1C;
 
     int rows_l = fsSettings["LEFT.height"];
     int cols_l = fsSettings["LEFT.width"];
@@ -73,11 +86,13 @@ bool OrbSlam2InterfaceStereo::stereoRectification()
         return false;
     }
 
-    cv::stereoRectify(K_l,D_l,K_r,D_r,cv::Size(cols_l,rows_l),T_c0c1.rowRange(0,3).colRange(0,3),T_c0c1.col(3).rowRange(0,3),
+    cv::stereoRectify(K_l,D_l,K_r,D_r,cv::Size(cols_l,rows_l),T_C0_1C.rowRange(0,3).colRange(0,3),T_C0_1C.col(3).rowRange(0,3),
     R_l,R_r,P_l,P_r,Q_);
 
-    cv::initUndistortRectifyMap(K_l,D_l,R_l,P_l.rowRange(0,3).colRange(0,3),cv::Size(cols_l,rows_l),CV_32F,M1l,M2l);
-    cv::initUndistortRectifyMap(K_r,D_r,R_r,P_r.rowRange(0,3).colRange(0,3),cv::Size(cols_r,rows_r),CV_32F,M1r,M2r);
+    cv::initUndistortRectifyMap(K_l,D_l,R_l,P_l.rowRange(0,3).colRange(0,3),cv::Size(cols_l,rows_l),CV_32F,M1l_,M2l_);
+    cv::initUndistortRectifyMap(K_r,D_r,R_r,P_r.rowRange(0,3).colRange(0,3),cv::Size(cols_r,rows_r),CV_32F,M1r_,M2r_);
+
+    stereo_rectified_ = true;
 
     return true;
 }
@@ -87,6 +102,8 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
     const sensor_msgs::ImageConstPtr& msg_right) {
   // Copy the ros image message to cv::Mat.
   cv_bridge::CvImageConstPtr cv_ptr_left;
+  cv::Mat T_C_W_opencv;
+
   try {
     cv_ptr_left = cv_bridge::toCvShare(msg_left);
   } catch (cv_bridge::Exception& e) {
@@ -101,21 +118,39 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
     return;
   }
 
-  cv::Mat imLeft, imRight;
-  cv::remap(cv_ptr_left->image,imLeft,M1l,M2l,cv::INTER_LINEAR);
-  cv::remap(cv_ptr_right->image,imRight,M1r,M2r,cv::INTER_LINEAR);
-  // Handing the image to ORB slam for tracking
-  cv::Mat T_C_W_opencv =
-      slam_system_->TrackStereo(imLeft, imRight,cv_ptr_left->header.stamp.toSec());
+  if(stereo_rectified_){
+    cv::Mat imLeft, imRight;
+    cv::remap(cv_ptr_left->image,imLeft,M1l_,M2l_,cv::INTER_LINEAR);
+    cv::remap(cv_ptr_right->image,imRight,M1r_,M2r_,cv::INTER_LINEAR);
+    // Handing the image to ORB slam for tracking
+    T_C_W_opencv =
+        slam_system_->TrackStereo(imLeft, imRight,cv_ptr_left->header.stamp.toSec());
+  }
+  else
+  {
+    T_C_W_opencv =
+      slam_system_->TrackStereo(cv_ptr_left->image, cv_ptr_right->image,cv_ptr_left->header.stamp.toSec()); 
+  }
+
   // If tracking successfull
   if (!T_C_W_opencv.empty()) {
     // Converting to kindr transform and publishing
-    Transformation T_C_W, T_W_C;
+    Transformation T_C_W, T_B_W, T_W_B;
     convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W);
-    T_W_C = T_C_W.inverse();
-    publishCurrentPose(T_W_C, msg_left->header);
+
+    if(got_body_transform_)
+    {
+      T_B_W = T_B_C_*T_C_W;
+    }
+    else
+    {
+      T_B_W = T_C_W;
+    }
+    
+    T_W_B = T_B_W.inverse();
+    publishCurrentPose(T_W_B, msg_left->header);
     // Saving the transform to the member for publishing as a TF
-    T_W_C_ = T_W_C;
+    T_W_B_ = T_W_B;
   }
 
 }
