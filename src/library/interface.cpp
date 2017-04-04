@@ -59,7 +59,7 @@ void OrbSlam2Interface::publishCurrentPose(const Transformation& T,
 
 void OrbSlam2Interface::publishCurrentPoseAsTF(const ros::TimerEvent& event) {
   tf::Transform tf_transform;
-  tf::transformKindrToTF(T_B_C_, &tf_transform);
+  tf::transformKindrToTF(T_W_B_, &tf_transform);
   tf_broadcaster_.sendTransform(tf::StampedTransform(
       tf_transform, ros::Time::now(), frame_id_, child_frame_id_));
 }

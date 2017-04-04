@@ -148,9 +148,14 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
     }
     
     T_W_B = T_B_W.inverse();
-    publishCurrentPose(T_W_B, msg_left->header);
+    //publishCurrentPose(T_W_B, msg_left->header);
     // Saving the transform to the member for publishing as a TF
     T_W_B_ = T_W_B;
+
+    tf::Transform tf_transform;
+    tf::transformKindrToTF(T_W_B_, &tf_transform);
+    tf_broadcaster_.sendTransform(tf::StampedTransform(
+    tf_transform, ros::Time::now(), frame_id_, child_frame_id_));
   }
 
 }
