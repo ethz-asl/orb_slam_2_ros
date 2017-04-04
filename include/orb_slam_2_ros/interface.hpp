@@ -11,6 +11,7 @@
 #include <tf/transform_broadcaster.h>
 #include <Eigen/Geometry>
 #include <opencv2/core/core.hpp>
+#include <minkindr_conversions/kindr_tf.h>
 
 #include "orb_slam_2_ros/types.hpp"
 
