@@ -39,7 +39,7 @@ bool OrbSlam2InterfaceStereo::getBodyTransform(cv::FileStorage &fsSettings)
   cv::Mat T_C0_B;
   Transformation T_C_B;
 
-  fsSettings["T_c0_imu0"] >> T_C0_B;
+  fsSettings["T_c0_fcuimu"] >> T_C0_B;
   convertOrbSlamPoseToKindr(T_C0_B, &T_C_B);
   T_B_C_ = T_C_B.inverse();
 
@@ -91,6 +91,16 @@ bool OrbSlam2InterfaceStereo::imagePreProcessing()
 
     cv::initUndistortRectifyMap(K_l,D_l,R_l,P_l.rowRange(0,3).colRange(0,3),cv::Size(cols_l,rows_l),CV_32F,M1l_,M2l_);
     cv::initUndistortRectifyMap(K_r,D_r,R_r,P_r.rowRange(0,3).colRange(0,3),cv::Size(cols_r,rows_r),CV_32F,M1r_,M2r_);
+
+    //Uncomment if you need to see the rectified instrinsics ex. to put in yaml file
+
+    /*
+    cout << "LEFT.R" << R_l << endl;
+    cout << "RIGHT.R" << R_r << endl;
+    cout << "LEFT.P" << P_l << endl;
+    cout << "RIGHT.P" << P_r << endl;
+    cout << "Baseline" << -1*P_r.at<float>(0,3) << endl; // baseline
+    */
 
     stereo_rectified_ = true;
 
