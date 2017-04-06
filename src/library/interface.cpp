@@ -18,6 +18,15 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
   // Getting data and params
   got_body_transform_ = false;
   //nh_private.getParam("settings_file_path", settings_file_path_);
+
+  double temp_array[16] = { 0,   0,  1, 0,
+                            1,   0,  0, 0,
+                            0,   1,  0, 0,
+                            0,   0,  0, 1};
+
+  cv::Mat temp_Mat = cv::Mat(4, 4, CV_64F, temp_array);
+  convertOrbSlamPoseToKindr(temp_Mat, &T_asl_orb_);
+
   advertiseTopics();
   getParametersFromRos();
 }

@@ -146,7 +146,23 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
   if (!T_C_W_opencv.empty()) {
     // Converting to kindr transform and publishing
     Transformation T_C_W, T_B_W, T_W_B;
-    convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W);
+
+
+    cv::Mat pos_neg = T_C_W_opencv.col(3).rowRange(0,4);
+    cv::Mat rot_t = T_C_W_opencv.rowRange(0,3).colRange(0,3).t();
+    cv::Mat rot_t_with_zeros;
+    cv::Mat right_hand_orb;
+
+    vconcat(rot_t, T_C_W_opencv.row(3).colRange(0,3),rot_t_with_zeros);
+
+    pos_neg.at<float>(0,0) *= -1;
+    pos_neg.at<float>(1,0) *= -1;
+    pos_neg.at<float>(2,0) *= -1;
+
+    hconcat(rot_t_with_zeros, pos_neg, right_hand_orb);
+
+    convertOrbSlamPoseToKindr(right_hand_orb, &T_C_W);
+
 
     if(got_body_transform_)
     {
@@ -157,15 +173,11 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
       T_B_W = T_C_W;
     }
     
-    T_W_B = T_B_W.inverse();
-    //publishCurrentPose(T_W_B, msg_left->header);
-    // Saving the transform to the member for publishing as a TF
-    T_W_B_ = T_W_B;
+    
+    publishCurrentPose(T_C_W, msg_left->header);
 
-    tf::Transform tf_transform;
-    tf::transformKindrToTF(T_W_B_, &tf_transform);
-    tf_broadcaster_.sendTransform(tf::StampedTransform(
-    tf_transform, ros::Time::now(), frame_id_, child_frame_id_));
+    // Saving the transform to the member for publishing as a TF
+    T_W_B_ = T_B_W;
   }
 
 }

@@ -66,6 +66,7 @@ class OrbSlam2Interface {
   // The current pose
   Transformation T_W_B_;
   Transformation T_B_C_;
+  Transformation T_asl_orb_; //transform btwn ASL and Orb Slam coordinates
 
   // Parameters
   bool verbose_;
