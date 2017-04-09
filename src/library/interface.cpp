@@ -19,11 +19,27 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
   got_body_transform_ = false;
   //nh_private.getParam("settings_file_path", settings_file_path_);
 
+  //old
+/*
+  double temp_array[16] = { 0,   0,  1, 0,
+                            -1,   0,  0, 0,
+                            0,   -1,  0, 0,
+                            0,   0,  0, 1};
+
+*/
+//T
   double temp_array[16] = { 0,   0,  1, 0,
                             1,   0,  0, 0,
                             0,   1,  0, 0,
                             0,   0,  0, 1};
 
+/*
+  double temp_array[16] = { 0,   0,  1, 0,
+                            0,   1,  0, 0,
+                            -1,   0,  0, 0,
+                            0,   0,  0, 1};
+
+*/
   cv::Mat temp_Mat = cv::Mat(4, 4, CV_64F, temp_array);
   convertOrbSlamPoseToKindr(temp_Mat, &T_asl_orb_);
 
@@ -58,6 +74,7 @@ void OrbSlam2Interface::publishCurrentPose(const Transformation& T,
   geometry_msgs::TransformStamped msg;
   // Filling out the header
   msg.header = header;
+  msg.header.frame_id = frame_id_;
   // Setting the child and parent frames
   msg.child_frame_id = child_frame_id_;
   // Converting from a minkindr transform to a transform message
