@@ -25,7 +25,7 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
 void OrbSlam2Interface::advertiseTopics() {
   // Advertising topics
   T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>(
-      "vi_orb_slam", 1);
+      "orb_slam_2", 1);
   // Creating a callback timer for TF publisher
   tf_timer_ = nh_.createTimer(ros::Duration(0.01),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);

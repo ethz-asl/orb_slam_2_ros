@@ -20,7 +20,7 @@ OrbSlam2InterfaceMono::OrbSlam2InterfaceMono(const ros::NodeHandle& nh,
   // Creating the SlAM system
   slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
       new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
-                            ORB_SLAM2::System::MONOCULAR, false));
+                            ORB_SLAM2::System::MONOCULAR, visualization_));
 }
 
 void OrbSlam2InterfaceMono::subscribeToTopics() {
