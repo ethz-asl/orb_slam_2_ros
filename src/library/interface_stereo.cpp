@@ -9,11 +9,22 @@ OrbSlam2InterfaceStereo::OrbSlam2InterfaceStereo(const ros::NodeHandle& nh,
     : OrbSlam2Interface(nh, nh_private),stereo_rectified_(false) {
   // Getting data and params
   subscribeToTopics();
-  advertiseTopics();
-  //getParametersFromRos();
+
+  if (!stereoRectification()){
+    ros::shutdown();
+    exit(1);
+  }
+
+  if(use_body_transform_){
+    if(!getBodyTransform()){
+      ros::shutdown();
+      exit(1);
+    }
+  }
+
   slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
       new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
-                            ORB_SLAM2::System::STEREO, false));
+                            ORB_SLAM2::System::STEREO, visualization_));
 }
 
 void OrbSlam2InterfaceStereo::subscribeToTopics() {
@@ -34,8 +45,16 @@ void OrbSlam2InterfaceStereo::subscribeToTopics() {
 
 }
 
-bool OrbSlam2InterfaceStereo::getBodyTransform(cv::FileStorage &fsSettings)
+bool OrbSlam2InterfaceStereo::getBodyTransform()
 {
+
+  cv::FileStorage fsSettings(settings_file_path_, cv::FileStorage::READ);
+  if(!fsSettings.isOpened())
+  {
+      ROS_ERROR("ERROR: Wrong path to settings");
+      return false;
+  }
+
   cv::Mat T_C0_B;
   Transformation T_C_B;
 
@@ -43,10 +62,10 @@ bool OrbSlam2InterfaceStereo::getBodyTransform(cv::FileStorage &fsSettings)
   convertOrbSlamPoseToKindr(T_C0_B, &T_C_B);
   T_B_C_ = T_C_B.inverse();
 
-  got_body_transform_ = false;
+  return true;
 }
 
-bool OrbSlam2InterfaceStereo::imagePreProcessing()
+bool OrbSlam2InterfaceStereo::stereoRectification()
 {
     // Load settings related to stereo calibration
     cv::FileStorage fsSettings(settings_file_path_, cv::FileStorage::READ);
@@ -55,9 +74,7 @@ bool OrbSlam2InterfaceStereo::imagePreProcessing()
         ROS_ERROR("ERROR: Wrong path to settings");
         return false;
     }
-
-    getBodyTransform(fsSettings);
-
+    
     cv::Mat K_l, K_r, P_l, P_r, R_l, R_r, D_l, D_r, T_C0_1C, Q_;
 
     fsSettings["LEFT.K"] >> K_l;
@@ -92,7 +109,7 @@ bool OrbSlam2InterfaceStereo::imagePreProcessing()
     cv::initUndistortRectifyMap(K_l,D_l,R_l,P_l.rowRange(0,3).colRange(0,3),cv::Size(cols_l,rows_l),CV_32F,M1l_,M2l_);
     cv::initUndistortRectifyMap(K_r,D_r,R_r,P_r.rowRange(0,3).colRange(0,3),cv::Size(cols_r,rows_r),CV_32F,M1r_,M2r_);
 
-    //Uncomment if you need to see the rectified instrinsics ex. to put in yaml file
+    //Uncomment if you want to see the rectified instrinsics ex. to put in yaml file
 
     /*
     cout << "LEFT.R" << R_l << endl;
@@ -145,72 +162,22 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
   // If tracking successfull
   if (!T_C_W_opencv.empty()) {
     // Converting to kindr transform and publishing
-    Transformation T_C_W, T_C_W_raw, T_B_W, T_W_B, T_output;
+    Transformation T_C_W, T_output;
+    convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W);
 
-
-    convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W_raw);
-
-    cv::Mat pos_neg = T_C_W_opencv.col(3).rowRange(0,4);
-    cv::Mat rot_t = T_C_W_opencv.rowRange(0,3).colRange(0,3).t();
-    cv::Mat rot_t_with_zeros;
-    cv::Mat right_hand_orb;
-
-    vconcat(rot_t, T_C_W_opencv.row(3).colRange(0,3),rot_t_with_zeros);
-
-    pos_neg.at<float>(0,0) *= -1;
-    pos_neg.at<float>(1,0) *= -1;
-    pos_neg.at<float>(2,0) *= -1;
-
-    hconcat(rot_t_with_zeros, pos_neg, right_hand_orb);
-
-    //convertOrbSlamPoseToKindr(right_hand_orb, &T_C_W);
-
-    if(got_body_transform_)
+    if(use_body_transform_)
     {
-      T_B_W = T_B_C_*T_C_W_raw;
+      T_output = T_B_C_*T_C_W.inverse();
     }
     else
     {
-      T_B_W = T_C_W_raw;
+     T_output = T_C_W.inverse();
     }
 
-
-
-    //Quaternion quat(0.59448206068,0.589229595689,0.381631806007,0.392118257338);
-    Quaternion quat(-0.59448206068,-0.589229595689,-0.381631806007,0.392118257338);
-    //Quaternion quat(0,0.1736,0,0.9848);
-    Eigen::Vector3d pos(3);
-
-    //pos(0) = 0.15945253478;
-    //pos(1) = 0.026512310814;
-    //pos(2) = -0.0467099051875;
-
-    pos(0) = -0.0291837989824;
-    pos(1) = -0.0212518784821;
-    pos(2) = -0.164336521361;
-
-    Transformation T_cam0_body = Transformation(quat, pos);
-
-    Transformation temp_asl_orb_;
-    double temp_array[16] = { 1,   0,  0, 0,
-                              0,   -1,  0, 0,
-                              0,   0,  -1, 0,
-                              0,   0,  0, 1};
-
-    cv::Mat temp_Mat = cv::Mat(4, 4, CV_64F, temp_array);
-    convertOrbSlamPoseToKindr(temp_Mat, &temp_asl_orb_);
-
-
-    T_output = T_B_C_*T_C_W_raw.inverse();
-    //T_output = T_B_W.inverse();
-
-    
-    //publishCurrentPose(T_B_W.inverse(),msg_left->header);
     publishCurrentPose(T_output, msg_left->header);
 
     // Saving the transform to the member for publishing as a TF
     T_W_B_ = T_output;
-	//T_W_B_ = T_B_W.inverse();
   }
 
 }

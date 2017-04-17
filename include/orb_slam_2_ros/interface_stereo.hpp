@@ -30,9 +30,9 @@ class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
   // Subscribes to the appropriate ROS topics
   void subscribeToTopics();
 
-  bool getBodyTransform(cv::FileStorage &fsSettings);
+  bool getBodyTransform();
 
-  bool imagePreProcessing();
+  bool stereoRectification();
 
   // Callbacks
   void stereoImageCallback(const sensor_msgs::ImageConstPtr& msg_left,

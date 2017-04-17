@@ -8,8 +8,6 @@
 #include "orb_slam_2_ros/interface_mono.hpp"
 #include "orb_slam_2_ros/interface_stereo.hpp"
 
-#define IMPLEMENT_PRE_PROCESSING true
-
 // A factory method for creating an interface
 std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> create_interface(
     std::string interface_type, const ros::NodeHandle& nh,
@@ -19,22 +17,10 @@ std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> create_interface(
   if (interface_type == "mono") {
     interface = std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface>(
         new orb_slam_2_interface::OrbSlam2InterfaceMono(nh, nh_private));
-    if(!interface->imagePreProcessing() && IMPLEMENT_PRE_PROCESSING)
-    {
-      ROS_FATAL("Mono pre processing failed");
-      ros::shutdown();
-      exit(1);
-    }
 
   } else if (interface_type == "stereo") {
     interface = std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface>(
         new orb_slam_2_interface::OrbSlam2InterfaceStereo(nh, nh_private));
-    if(!interface->imagePreProcessing() && IMPLEMENT_PRE_PROCESSING)
-    {
-      ROS_FATAL("Stereo pre processing failed");
-      ros::shutdown();
-      exit(1);
-    }
 
   } else {
     ROS_FATAL(

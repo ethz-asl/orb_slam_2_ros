@@ -48,7 +48,7 @@ class OrbSlam2Interface {
   // Helper functions
   void convertOrbSlamPoseToKindr(const cv::Mat& T_cv, Transformation* T_kindr);
 
-  virtual bool getBodyTransform(cv::FileStorage &fsSettings)
+  virtual bool getBodyTransform()
   {return false;}
 
   // Node handles
@@ -70,15 +70,15 @@ class OrbSlam2Interface {
 
   // Parameters
   bool verbose_;
+  bool visualization_;
+  bool use_body_transform_;
   std::string vocabulary_file_path_;
   std::string settings_file_path_;
 
   // Transform frame names
   std::string frame_id_;
   std::string child_frame_id_;
-
-  bool got_body_transform_;
-
+  
 };
 
 }  // namespace orb_slam_2_interface
