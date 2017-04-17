@@ -58,29 +58,28 @@ void OrbSlam2InterfaceMono::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     ROS_ERROR("cv_bridge exception: %s", e.what());
     return;
   }
-  //TODO Add distortion corredtion for Mono
+
   // Handing the image to ORB slam for tracking
   cv::Mat T_C_W_opencv =
       slam_system_->TrackMonocular(cv_ptr->image, cv_ptr->header.stamp.toSec());
   // If tracking successfull
   if (!T_C_W_opencv.empty()) {
     // Converting to kindr transform and publishing
-    Transformation T_C_W, T_output;
+    Transformation T_C_W;
     convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W);
 
+    // Saving the transform to the member for publishing as a TF
     if(use_body_transform_)
     {
-      T_output = T_B_C_*T_C_W.inverse();
+      T_W_B_ = T_B_C_*T_C_W.inverse();
     }
     else
     {
-     T_output = T_C_W.inverse();
+     T_W_B_ = T_C_W.inverse();
     }
     
-    publishCurrentPose(T_output, msg->header);
-
-    // Saving the transform to the member for publishing as a TF
-    T_W_B_ = T_output;
+    // Publish Pose as ROS msg
+    publishCurrentPose(T_W_B_, msg->header);
   }
 }
 

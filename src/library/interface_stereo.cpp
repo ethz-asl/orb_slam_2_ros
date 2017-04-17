@@ -162,22 +162,21 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
   // If tracking successfull
   if (!T_C_W_opencv.empty()) {
     // Converting to kindr transform and publishing
-    Transformation T_C_W, T_output;
+    Transformation T_C_W;
     convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W);
 
+    // Saving the transform to the member for publishing as a TF
     if(use_body_transform_)
     {
-      T_output = T_B_C_*T_C_W.inverse();
+      T_W_B_ = T_B_C_*T_C_W.inverse();
     }
     else
     {
-     T_output = T_C_W.inverse();
+     T_W_B_ = T_C_W.inverse();
     }
 
-    publishCurrentPose(T_output, msg_left->header);
-
-    // Saving the transform to the member for publishing as a TF
-    T_W_B_ = T_output;
+    publishCurrentPose(T_W_B_, msg_left->header);
+    
   }
 
 }
