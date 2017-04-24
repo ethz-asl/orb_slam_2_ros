@@ -6,12 +6,12 @@
     <param name="vocabulary_file_path" value="/home/raab/ros_vios/catkin_ws/build/orb_slam_2_catkin/orb_slam_2_src-prefix/src/orb_slam_2_src/Vocabulary/ORBvoc.txt" />
     <param name="settings_file_path" value="/home/raab/ros_vios/catkin_ws/build/orb_slam_2_catkin/orb_slam_2_src-prefix/src/orb_slam_2_src/Settings/vios_calibration.yaml" />
     <param name="visualization" type="bool" value="true" /> <!-- Disale when running on quadcotper -->
-    <param name="use_body_transform" type="bool" value="false" /> <!-- Works only with Visual inertial orbslam -->
+    <param name="use_body_transform" type="bool" value="false" /> <!-- Body transform isn't available in vanilla Orb Slam 2 -->
 
     <!-- param name="vocabulary_file_path" value="/home/millanea/trunk/datasets/kitti/raw/ORBvoc.txt" /-->
     <!-- param name="settings_file_path" value="/home/millanea/trunk/datasets/kitti/raw/2011_09_30_drive_18/KITTI00-02_stereo.yaml" /-->
-    <!-- remap from="camera/left/image_raw" to="/cam00/image_raw" /-->
-	<!-- remap from="camera/right/image_raw" to="/cam01/image_raw" /-->
+    <remap from="camera/left/image_raw" to="/cam0/image_raw" />
+	<remap from="camera/right/image_raw" to="/cam1/image_raw" />
 
 
   </node>

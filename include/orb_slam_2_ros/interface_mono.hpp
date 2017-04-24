@@ -22,8 +22,6 @@ class OrbSlam2InterfaceMono : public OrbSlam2Interface {
   // Callbacks
   void imageCallback(const sensor_msgs::ImageConstPtr& msg);
 
-  bool getBodyTransform();
-
   // Subscribers
   ros::Subscriber image_sub_;
 

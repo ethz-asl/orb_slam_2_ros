@@ -14,18 +14,24 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
       nh_private_(nh_private),
       verbose_(kDefaultVerbose),
       frame_id_(kDefaultFrameId),
-      child_frame_id_(kDefaultChildFrameId){
-  // Getting data and params
-  use_body_transform_ = false;
+      child_frame_id_(kDefaultChildFrameId),
+      visualization_(kDefaultVisualization),
+      use_body_transform_(kDefaultUseBodyTransform){
 
   advertiseTopics();
   getParametersFromRos();
+
+  if(use_body_transform_)
+  {
+    getBodyTransform();
+  }
+  
 }
 
 void OrbSlam2Interface::advertiseTopics() {
   // Advertising topics
   T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>(
-      "orb_slam_2", 1);
+      "transform_cam", 1);
   // Creating a callback timer for TF publisher
   tf_timer_ = nh_.createTimer(ros::Duration(0.01),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);
@@ -86,6 +92,26 @@ void OrbSlam2Interface::convertOrbSlamPoseToKindr(const cv::Mat& T_cv,
   Quaternion q_kindr(R);
   Eigen::Vector3d t_kindr(T_eigen_d.block<3, 1>(0, 3));
   *T_kindr = Transformation(q_kindr, t_kindr);
+}
+
+void OrbSlam2Interface::getBodyTransform() {
+  cv::FileStorage fsSettings(settings_file_path_, cv::FileStorage::READ);
+
+  cv::Mat T_C_B_opencv;
+  Transformation T_C_B;
+
+  fsSettings["T_c0_fcuimu"] >> T_C_B_opencv;
+
+  if (T_C_B_opencv.empty()) {
+    ROS_ERROR("Body to camera transform is missing!");
+    use_body_transform_ = false;
+    return;
+  }
+
+  convertOrbSlamPoseToKindr(T_C_B_opencv, &T_C_B);
+  T_B_C_ = T_C_B.inverse();
+
+  return;
 }
 
 }  // namespace orb_slam_2_interface

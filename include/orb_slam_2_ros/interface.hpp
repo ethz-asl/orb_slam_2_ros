@@ -19,6 +19,8 @@ namespace orb_slam_2_interface {
 
 // Default values for parameters
 static const bool kDefaultVerbose = true;
+static const bool kDefaultVisualization = true;
+static const bool kDefaultUseBodyTransform = false;
 static const std::string kDefaultFrameId = "world";
 static const std::string kDefaultChildFrameId = "cam0";
 
@@ -28,9 +30,6 @@ class OrbSlam2Interface {
   // Constructor
   OrbSlam2Interface(const ros::NodeHandle& nh,
                     const ros::NodeHandle& nh_private);
-
-  virtual bool imagePreProcessing()
-  { return false; }
 
  protected:
   // Subscribes and Advertises to the appropriate ROS topics
@@ -48,8 +47,8 @@ class OrbSlam2Interface {
   // Helper functions
   void convertOrbSlamPoseToKindr(const cv::Mat& T_cv, Transformation* T_kindr);
 
-  virtual bool getBodyTransform()
-  {return false;}
+  // Returns transform from camera to body
+  void getBodyTransform();
 
   // Node handles
   ros::NodeHandle nh_;
@@ -64,9 +63,8 @@ class OrbSlam2Interface {
   std::shared_ptr<ORB_SLAM2::System> slam_system_;
 
   // The current pose
-  Transformation T_W_B_;
-  Transformation T_B_C_;
-  Transformation T_asl_orb_; //transform btwn ASL and Orb Slam coordinates
+  Transformation T_B_C_; // From camera to body
+  Transformation T_W_B_; // From body to world
 
   // Parameters
   bool verbose_;

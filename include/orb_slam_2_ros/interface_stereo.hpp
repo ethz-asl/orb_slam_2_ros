@@ -30,9 +30,8 @@ class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
   // Subscribes to the appropriate ROS topics
   void subscribeToTopics();
 
-  bool getBodyTransform();
-
-  bool stereoRectification();
+  // Gets stereo rectification maps
+  void stereoRectification();
 
   // Callbacks
   void stereoImageCallback(const sensor_msgs::ImageConstPtr& msg_left,
@@ -43,8 +42,10 @@ class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> right_sub_;
   std::shared_ptr<message_filters::Synchronizer<sync_pol>> sync_;
 
-  cv::Mat M1l_,M2l_,M1r_,M2r_;
+  // Rectification maps
+  cv::Mat M1l_, M2l_, M1r_, M2r_;
 
+  // Rectification state
   bool stereo_rectified_;
 
 };

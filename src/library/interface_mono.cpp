@@ -10,13 +10,6 @@ OrbSlam2InterfaceMono::OrbSlam2InterfaceMono(const ros::NodeHandle& nh,
   // Getting data and params
   subscribeToTopics();
 
-  if(use_body_transform_){
-    if(!getBodyTransform()){
-      ros::shutdown();
-      exit(1);
-    }
-  }
-
   // Creating the SlAM system
   slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
       new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
@@ -25,28 +18,8 @@ OrbSlam2InterfaceMono::OrbSlam2InterfaceMono(const ros::NodeHandle& nh,
 
 void OrbSlam2InterfaceMono::subscribeToTopics() {
   // Subscribing to the required data topics
-  image_sub_ = nh_.subscribe("cam0/image_raw", 1,
+  image_sub_ = nh_.subscribe("camera/image_raw", 1,
                              &OrbSlam2InterfaceMono::imageCallback, this);
-}
-
-bool OrbSlam2InterfaceMono::getBodyTransform()
-{
-
-  cv::FileStorage fsSettings(settings_file_path_, cv::FileStorage::READ);
-  if(!fsSettings.isOpened())
-  {
-      ROS_ERROR("ERROR: Wrong path to settings");
-      return false;
-  }
-
-  cv::Mat T_C0_B;
-  Transformation T_C_B;
-
-  fsSettings["T_c0_fcuimu"] >> T_C0_B;
-  convertOrbSlamPoseToKindr(T_C0_B, &T_C_B);
-  T_B_C_ = T_C_B.inverse();
-
-  return true;
 }
 
 void OrbSlam2InterfaceMono::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
