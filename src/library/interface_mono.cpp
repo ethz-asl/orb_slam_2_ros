@@ -22,7 +22,8 @@ void OrbSlam2InterfaceMono::subscribeToTopics() {
                              &OrbSlam2InterfaceMono::imageCallback, this);
 }
 
-void OrbSlam2InterfaceMono::imageCallback(const sensor_msgs::ImageConstPtr& msg) {
+void OrbSlam2InterfaceMono::imageCallback(
+    const sensor_msgs::ImageConstPtr& msg) {
   // Copy the ros image message to cv::Mat.
   cv_bridge::CvImageConstPtr cv_ptr;
   try {
@@ -42,15 +43,12 @@ void OrbSlam2InterfaceMono::imageCallback(const sensor_msgs::ImageConstPtr& msg)
     convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W);
 
     // Saving the transform to the member for publishing as a TF
-    if(use_body_transform_)
-    {
-      T_W_B_ = T_B_C_*T_C_W.inverse();
+    if (use_body_transform_) {
+      T_W_B_ = T_B_C_ * T_C_W.inverse();
+    } else {
+      T_W_B_ = T_C_W.inverse();
     }
-    else
-    {
-     T_W_B_ = T_C_W.inverse();
-    }
-    
+
     // Publish Pose as ROS msg
     publishCurrentPose(T_W_B_, msg->header);
   }
