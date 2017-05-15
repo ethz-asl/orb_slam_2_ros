@@ -7,7 +7,6 @@
 #include <opencv2/core/eigen.hpp>
 
 namespace orb_slam_2_interface {
-
 OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
                                      const ros::NodeHandle& nh_private)
     : nh_(nh),
@@ -16,16 +15,13 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
       frame_id_(kDefaultFrameId),
       child_frame_id_(kDefaultChildFrameId),
       visualization_(kDefaultVisualization),
-      use_body_transform_(kDefaultUseBodyTransform){
-
+      use_body_transform_(kDefaultUseBodyTransform) {
   advertiseTopics();
   getParametersFromRos();
 
-  if(use_body_transform_)
-  {
+  if (use_body_transform_) {
     getBodyTransform();
   }
-  
 }
 
 void OrbSlam2Interface::advertiseTopics() {

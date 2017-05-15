@@ -43,11 +43,11 @@ class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
   std::shared_ptr<message_filters::Synchronizer<sync_pol>> sync_;
 
   // Rectification maps
-  cv::Mat M1l_, M2l_, M1r_, M2r_;
+  cv::Mat left_rectification_map1_, left_rectification_map2_,
+      right_rectification_map1_, right_rectification_map2_;
 
   // Rectification state
   bool stereo_rectified_;
-
 };
 
 }  // namespace orb_slam_2_interface

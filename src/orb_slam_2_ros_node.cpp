@@ -21,8 +21,7 @@ std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> create_interface(
     interface = std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface>(
         new orb_slam_2_interface::OrbSlam2InterfaceStereo(nh, nh_private));
   } else {
-    ROS_FATAL(
-        "interface type not recognized. Must be mono or stereo.");
+    ROS_FATAL("interface type not recognized. Must be mono or stereo.");
     ros::shutdown();
     exit(1);
   }

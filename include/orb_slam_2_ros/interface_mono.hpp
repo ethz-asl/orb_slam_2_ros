@@ -24,7 +24,6 @@ class OrbSlam2InterfaceMono : public OrbSlam2Interface {
 
   // Subscribers
   ros::Subscriber image_sub_;
-
 };
 
 }  // namespace orb_slam_2_interface

@@ -5,13 +5,13 @@
 #include <string>
 
 #include <geometry_msgs/TransformStamped.h>
+#include <minkindr_conversions/kindr_tf.h>
 #include <orb_slam_2/System.h>
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <tf/transform_broadcaster.h>
 #include <Eigen/Geometry>
 #include <opencv2/core/core.hpp>
-#include <minkindr_conversions/kindr_tf.h>
 
 #include "orb_slam_2_ros/types.hpp"
 
@@ -63,8 +63,8 @@ class OrbSlam2Interface {
   std::shared_ptr<ORB_SLAM2::System> slam_system_;
 
   // The current pose
-  Transformation T_B_C_; // From camera to body
-  Transformation T_W_B_; // From body to world
+  Transformation T_B_C_;  // From camera to body
+  Transformation T_W_B_;  // From body to world
 
   // Parameters
   bool verbose_;
@@ -76,7 +76,6 @@ class OrbSlam2Interface {
   // Transform frame names
   std::string frame_id_;
   std::string child_frame_id_;
-  
 };
 
 }  // namespace orb_slam_2_interface

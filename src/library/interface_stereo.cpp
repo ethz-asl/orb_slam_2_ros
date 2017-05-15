@@ -3,7 +3,6 @@
 #include "orb_slam_2_ros/interface_stereo.hpp"
 
 namespace orb_slam_2_interface {
-
 OrbSlam2InterfaceStereo::OrbSlam2InterfaceStereo(
     const ros::NodeHandle& nh, const ros::NodeHandle& nh_private)
     : OrbSlam2Interface(nh, nh_private) {
@@ -39,7 +38,7 @@ void OrbSlam2InterfaceStereo::stereoRectification() {
   // Load settings related to stereo calibration
   cv::FileStorage fsSettings(settings_file_path_, cv::FileStorage::READ);
 
-  cv::Mat K_l, K_r, P_l, P_r, R_l, R_r, D_l, D_r, T_C0_1C, Q_;
+  cv::Mat K_l, K_r, P_l, P_r, R_l, R_r, D_l, D_r, T_C1_C0, Q_;
 
   fsSettings["LEFT.K"] >> K_l;
   fsSettings["RIGHT.K"] >> K_r;
@@ -53,38 +52,33 @@ void OrbSlam2InterfaceStereo::stereoRectification() {
   fsSettings["LEFT.D"] >> D_l;
   fsSettings["RIGHT.D"] >> D_r;
 
-  fsSettings["T_c0_c1"] >> T_C0_1C;
+  fsSettings["T_RIGHT_LEFT"] >> T_C1_C0;
 
   int rows_l = fsSettings["LEFT.height"];
   int cols_l = fsSettings["LEFT.width"];
   int rows_r = fsSettings["RIGHT.height"];
   int cols_r = fsSettings["RIGHT.width"];
 
-  if (K_l.empty() || K_r.empty() || P_l.empty() || P_r.empty() || R_l.empty() ||
-      R_r.empty() || D_l.empty() || D_r.empty() || rows_l == 0 || rows_r == 0 ||
-      cols_l == 0 || cols_r == 0) {
+  if (K_l.empty() || K_r.empty() || D_l.empty() || D_r.empty() || rows_l == 0 ||
+      rows_r == 0 || cols_l == 0 || cols_r == 0) {
     ROS_ERROR("Calibration parameters to rectify stereo are missing!");
     return;
   }
-
-  cv::stereoRectify(K_l, D_l, K_r, D_r, cv::Size(cols_l, rows_l),
-                    T_C0_1C.rowRange(0, 3).colRange(0, 3),
-                    T_C0_1C.col(3).rowRange(0, 3), R_l, R_r, P_l, P_r, Q_);
-
+  // In case rectification matricies or projection matrices are missing, they
+  // can be calculated directly.
+  if (R_l.empty() || R_r.empty() || P_l.empty() || P_r.empty()) {
+    cv::stereoRectify(K_l, D_l, K_r, D_r, cv::Size(cols_l, rows_l),
+                      T_C1_C0.rowRange(0, 3).colRange(0, 3),
+                      T_C1_C0.col(3).rowRange(0, 3), R_l, R_r, P_l, P_r, Q_);
+  }
   cv::initUndistortRectifyMap(K_l, D_l, R_l, P_l.rowRange(0, 3).colRange(0, 3),
-                              cv::Size(cols_l, rows_l), CV_32F, M1l_, M2l_);
+                              cv::Size(cols_l, rows_l), CV_32F,
+                              left_rectification_map1_,
+                              left_rectification_map2_);
   cv::initUndistortRectifyMap(K_r, D_r, R_r, P_r.rowRange(0, 3).colRange(0, 3),
-                              cv::Size(cols_r, rows_r), CV_32F, M1r_, M2r_);
-
-  // Uncomment if you want to see the rectified instrinsics ex. to put in yaml
-
-  /*
-  cout << "LEFT.R" << R_l << endl;
-  cout << "RIGHT.R" << R_r << endl;
-  cout << "LEFT.P" << P_l << endl;
-  cout << "RIGHT.P" << P_r << endl;
-  cout << "Baseline" << -1*P_r.at<float>(0,3) << endl; // baseline
-  */
+                              cv::Size(cols_r, rows_r), CV_32F,
+                              right_rectification_map1_,
+                              right_rectification_map2_);
 
   stereo_rectified_ = true;
 
@@ -114,8 +108,10 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
 
   if (stereo_rectified_) {
     cv::Mat imLeft, imRight;
-    cv::remap(cv_ptr_left->image, imLeft, M1l_, M2l_, cv::INTER_LINEAR);
-    cv::remap(cv_ptr_right->image, imRight, M1r_, M2r_, cv::INTER_LINEAR);
+    cv::remap(cv_ptr_left->image, imLeft, left_rectification_map1_,
+              left_rectification_map2_, cv::INTER_LINEAR);
+    cv::remap(cv_ptr_right->image, imRight, right_rectification_map1_,
+              right_rectification_map2_, cv::INTER_LINEAR);
     // Handing the image to ORB slam for tracking
     T_C_W_opencv = slam_system_->TrackStereo(imLeft, imRight,
                                              cv_ptr_left->header.stamp.toSec());
