@@ -97,19 +97,22 @@ void OrbSlam2Interface::convertOrbSlamPoseToKindr(const cv::Mat& T_cv,
 void OrbSlam2Interface::getBodyTransform() {
   cv::FileStorage fsSettings(settings_file_path_, cv::FileStorage::READ);
 
-  cv::Mat T_C_B_opencv;
-  Transformation T_C_B;
+  cv::Mat T_C_B_opencv, T_B_V_opencv;
+  Transformation T_C_B, T_B_V;
 
-  fsSettings["T_c0_fcuimu"] >> T_C_B_opencv;
+  fsSettings["T_LEFT_IMU"] >> T_C_B_opencv;
+  fsSettings["T_IMU_VICON"] >> T_B_V_opencv;
 
-  if (T_C_B_opencv.empty()) {
+  if (T_C_B_opencv.empty() || T_B_V_opencv.empty()) {
     ROS_ERROR("Body to camera transform is missing!");
     use_body_transform_ = false;
     return;
   }
 
   convertOrbSlamPoseToKindr(T_C_B_opencv, &T_C_B);
+  convertOrbSlamPoseToKindr(T_B_V_opencv, &T_B_V);
   T_B_C_ = T_C_B.inverse();
+  T_V_B_ = T_B_V;
 
   return;
 }

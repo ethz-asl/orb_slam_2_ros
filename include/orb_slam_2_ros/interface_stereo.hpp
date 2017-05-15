@@ -3,6 +3,7 @@
 
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
+#include <sensor_msgs/Imu.h>
 
 #include <message_filters/subscriber.h>
 #include <message_filters/sync_policies/approximate_time.h>
@@ -37,10 +38,13 @@ class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
   void stereoImageCallback(const sensor_msgs::ImageConstPtr& msg_left,
                            const sensor_msgs::ImageConstPtr& msg_right);
 
+  void ImuCallback(const sensor_msgs::Imu& imu);
+
   // Subscribers
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> left_sub_;
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> right_sub_;
   std::shared_ptr<message_filters::Synchronizer<sync_pol>> sync_;
+  ros::Subscriber imu_sub_;
 
   // Rectification maps
   cv::Mat M1l_, M2l_, M1r_, M2r_;

@@ -33,6 +33,9 @@ void OrbSlam2InterfaceStereo::subscribeToTopics() {
   // Registering the synchronized image callback
   sync_->registerCallback(
       boost::bind(&OrbSlam2InterfaceStereo::stereoImageCallback, this, _1, _2));
+
+
+  imu_sub_ = nh_.subscribe("/imu0",10,&OrbSlam2InterfaceStereo::ImuCallback, this);
 }
 
 void OrbSlam2InterfaceStereo::stereoRectification() {
@@ -53,7 +56,7 @@ void OrbSlam2InterfaceStereo::stereoRectification() {
   fsSettings["LEFT.D"] >> D_l;
   fsSettings["RIGHT.D"] >> D_r;
 
-  fsSettings["T_c0_c1"] >> T_C0_1C;
+  fsSettings["T_RIGHT_LEFT"] >> T_C0_1C;
 
   int rows_l = fsSettings["LEFT.height"];
   int cols_l = fsSettings["LEFT.width"];
@@ -67,24 +70,15 @@ void OrbSlam2InterfaceStereo::stereoRectification() {
     return;
   }
 
-  cv::stereoRectify(K_l, D_l, K_r, D_r, cv::Size(cols_l, rows_l),
-                    T_C0_1C.rowRange(0, 3).colRange(0, 3),
-                    T_C0_1C.col(3).rowRange(0, 3), R_l, R_r, P_l, P_r, Q_);
+  // cv::stereoRectify(K_l, D_l, K_r, D_r, cv::Size(cols_l, rows_l),
+  //                   T_C0_1C.rowRange(0, 3).colRange(0, 3),
+  //                   T_C0_1C.col(3).rowRange(0, 3), R_l, R_r, P_l, P_r, Q_);
 
   cv::initUndistortRectifyMap(K_l, D_l, R_l, P_l.rowRange(0, 3).colRange(0, 3),
                               cv::Size(cols_l, rows_l), CV_32F, M1l_, M2l_);
   cv::initUndistortRectifyMap(K_r, D_r, R_r, P_r.rowRange(0, 3).colRange(0, 3),
                               cv::Size(cols_r, rows_r), CV_32F, M1r_, M2r_);
-
-  // Uncomment if you want to see the rectified instrinsics ex. to put in yaml
-
-  /*
-  cout << "LEFT.R" << R_l << endl;
-  cout << "RIGHT.R" << R_r << endl;
-  cout << "LEFT.P" << P_l << endl;
-  cout << "RIGHT.P" << P_r << endl;
-  cout << "Baseline" << -1*P_r.at<float>(0,3) << endl; // baseline
-  */
+  
 
   stereo_rectified_ = true;
 
@@ -96,7 +90,7 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
     const sensor_msgs::ImageConstPtr& msg_right) {
   // Copy the ros image message to cv::Mat.
   cv_bridge::CvImageConstPtr cv_ptr_left;
-  cv::Mat T_C_W_opencv;
+  cv::Mat T_W_C_opencv;
 
   try {
     cv_ptr_left = cv_bridge::toCvShare(msg_left);
@@ -117,29 +111,60 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
     cv::remap(cv_ptr_left->image, imLeft, M1l_, M2l_, cv::INTER_LINEAR);
     cv::remap(cv_ptr_right->image, imRight, M1r_, M2r_, cv::INTER_LINEAR);
     // Handing the image to ORB slam for tracking
-    T_C_W_opencv = slam_system_->TrackStereo(imLeft, imRight,
+    T_W_C_opencv = slam_system_->TrackStereo(imLeft, imRight,
                                              cv_ptr_left->header.stamp.toSec());
   } else {
-    T_C_W_opencv =
+    T_W_C_opencv =
         slam_system_->TrackStereo(cv_ptr_left->image, cv_ptr_right->image,
                                   cv_ptr_left->header.stamp.toSec());
   }
 
   // If tracking successfull
-  if (!T_C_W_opencv.empty()) {
+  if (!T_W_C_opencv.empty()) {
     // Converting to kindr transform and publishing
-    Transformation T_C_W;
-    convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W);
+    Transformation T_W_C;
+    convertOrbSlamPoseToKindr(T_W_C_opencv, &T_W_C);
 
     // Saving the transform to the member for publishing as a TF
     if (use_body_transform_) {
-      T_W_B_ = T_B_C_ * T_C_W.inverse();
+      T_W_B_ = T_V_B_ * T_B_C_ * T_W_C.inverse();
     } else {
-      T_W_B_ = T_C_W.inverse();
+      T_W_B_ = T_W_C.inverse();
     }
 
     publishCurrentPose(T_W_B_, msg_left->header);
   }
+}
+
+
+
+void OrbSlam2InterfaceStereo::ImuCallback(const sensor_msgs::Imu& imu){    
+    //cout << "Got IMU data" << endl;
+
+    // struct ORB_SLAM2::IMUMeas newMeas;
+    // newMeas.ang_vel = Eigen::Vector3d::Zero(3);
+    // newMeas.lin_acc = Eigen::Vector3d::Zero(3);
+
+    // ORB_SLAM2::MotionModel* mpMotionModel = slam_system_->GetMotionModeler();
+
+    // uint64_t seconds = imu.header.stamp.sec;
+    // uint64_t nseconds = imu.header.stamp.nsec;
+
+    // seconds = seconds%100000;
+
+    // newMeas.time_stamp = seconds*1000 + nseconds/1000000;
+
+    // newMeas.ang_vel(0) = imu.angular_velocity.x;
+    // newMeas.ang_vel(1) = imu.angular_velocity.y;
+    // newMeas.ang_vel(2) = imu.angular_velocity.z;
+
+    // newMeas.lin_acc(0) = imu.linear_acceleration.x;
+    // newMeas.lin_acc(1) = imu.linear_acceleration.y;
+    // newMeas.lin_acc(2) = imu.linear_acceleration.z;
+
+    // mpMotionModel->NewMeasurement(&newMeas);
+    // mpMotionModel->ProcessIMUMeas();
+    
 }
 
 }  // namespace orb_slam_2_interface
