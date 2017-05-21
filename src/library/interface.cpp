@@ -16,10 +16,15 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
       frame_id_(kDefaultFrameId),
       child_frame_id_(kDefaultChildFrameId),
       visualization_(kDefaultVisualization),
-      use_body_transform_(kDefaultUseBodyTransform){
+      use_body_transform_(kDefaultUseBodyTransform),
+      use_imu_(kDefaultUseImu){
 
   advertiseTopics();
   getParametersFromRos();
+
+  if(use_imu_){
+    #define USING_IMU true;
+  }
 
   if(use_body_transform_)
   {
@@ -49,6 +54,7 @@ void OrbSlam2Interface::getParametersFromRos() {
   nh_private_.getParam("child_frame_id", child_frame_id_);
   nh_private_.getParam("visualization", visualization_);
   nh_private_.getParam("use_body_transform", use_body_transform_);
+  nh_private_.getParam("use_imu", use_imu_);
 }
 
 void OrbSlam2Interface::publishCurrentPose(const Transformation& T,

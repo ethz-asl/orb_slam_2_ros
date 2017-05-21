@@ -21,6 +21,7 @@ namespace orb_slam_2_interface {
 static const bool kDefaultVerbose = true;
 static const bool kDefaultVisualization = true;
 static const bool kDefaultUseBodyTransform = false;
+static const bool kDefaultUseImu = false;
 static const std::string kDefaultFrameId = "world";
 static const std::string kDefaultChildFrameId = "cam0";
 
@@ -70,6 +71,7 @@ class OrbSlam2Interface {
   bool verbose_;
   bool visualization_;
   bool use_body_transform_;
+  bool use_imu_;
   std::string vocabulary_file_path_;
   std::string settings_file_path_;
 
