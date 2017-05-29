@@ -22,10 +22,6 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
   advertiseTopics();
   getParametersFromRos();
 
-  if(use_imu_){
-    #define USING_IMU true;
-  }
-
   if(use_body_transform_)
   {
     getBodyTransform();
@@ -38,7 +34,7 @@ void OrbSlam2Interface::advertiseTopics() {
   T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>(
       "transform_cam", 1);
   // Creating a callback timer for TF publisher
-  tf_timer_ = nh_.createTimer(ros::Duration(0.01),
+  tf_timer_ = nh_.createTimer(ros::Duration(0.05),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);
 }
 

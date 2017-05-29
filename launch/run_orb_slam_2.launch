@@ -3,15 +3,11 @@
 
   <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen" >
     <param name="interface_type" value="stereo" />
-    <param name="vocabulary_file_path" value="/home/raab/ros_vios/catkin_ws/build/orb_slam_2_catkin/orb_slam_2_src-prefix/src/orb_slam_2_src/Vocabulary/ORBvoc.txt" />
-    <!--param name="settings_file_path" value="/home/raab/ros_vios/catkin_ws/build/orb_slam_2_catkin/orb_slam_2_src-prefix/src/orb_slam_2_src/Examples/Stereo/EuRoC.yaml" /-->
-    <param name="settings_file_path" value="/home/raab/sp/VIOS/Settings/EuRoC.yaml" />
-    <param name="visualization" type="bool" value="true" /> <!-- Disale when running on quadcotper -->
+    <param name="vocabulary_file_path" value="/home/raab/VIOS/Vocabulary/ORBvoc.txt" />
+    <param name="settings_file_path" value="/home/raab/VIOS/Settings/VIOS_dataset.yaml" />
+    <param name="visualization" type="bool" value="false" /> <!-- Disale when running on quadcotper -->
     <param name="use_body_transform" type="bool" value="true" /> <!-- Body transform isn't available in vanilla Orb Slam 2 -->
     <param name="use_imu" type="bool" value ="true"/>
-
-    <!-- param name="vocabulary_file_path" value="/home/millanea/trunk/datasets/kitti/raw/ORBvoc.txt" /-->
-    <!-- param name="settings_file_path" value="/home/millanea/trunk/datasets/kitti/raw/2011_09_30_drive_18/KITTI00-02_stereo.yaml" /-->
     <remap from="camera/left/image_raw" to="/cam0/image_raw" />
 	<remap from="camera/right/image_raw" to="/cam1/image_raw" />
 

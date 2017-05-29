@@ -38,7 +38,9 @@ class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
   void stereoImageCallback(const sensor_msgs::ImageConstPtr& msg_left,
                            const sensor_msgs::ImageConstPtr& msg_right);
 
+  #ifdef USE_IMU
   void ImuCallback(const sensor_msgs::Imu& imu);
+  #endif
 
   // Subscribers
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> left_sub_;

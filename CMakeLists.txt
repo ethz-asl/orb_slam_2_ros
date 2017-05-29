@@ -9,6 +9,12 @@ catkin_simple(ALL_DEPS_REQUIRED)
 find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
 
+OPTION(USE_IMU "Using Imu" OFF)
+
+IF(USE_IMU)
+    ADD_DEFINITIONS(-DUSE_IMU)
+ENDIF(USE_IMU)
+
 cs_add_library(orb_slam_2_interface
   src/library/interface.cpp
   src/library/interface_mono.cpp
