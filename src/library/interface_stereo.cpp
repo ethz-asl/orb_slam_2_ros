@@ -35,7 +35,7 @@ void OrbSlam2InterfaceStereo::subscribeToTopics() {
       boost::bind(&OrbSlam2InterfaceStereo::stereoImageCallback, this, _1, _2));
 
 #ifdef USE_IMU
-  imu_sub_ = nh_.subscribe("/fcu/imu",10,&OrbSlam2InterfaceStereo::ImuCallback, this);
+  imu_sub_ = nh_.subscribe("/imu0",10,&OrbSlam2InterfaceStereo::ImuCallback, this);
 #endif
 }
 
@@ -67,7 +67,7 @@ void OrbSlam2InterfaceStereo::stereoRectification() {
   fsSettings["LEFT.R"] >> R_l;
   fsSettings["RIGHT.R"] >> R_r;
 
-  fsSettings["T_RIGHT_LEFT"] >> T_R_L;
+  fsSettings["T_CAM1_CAM0"] >> T_R_L;
 
   if (P_l.empty() || P_r.empty() || R_l.empty() || R_r.empty()) {
     if (!T_R_L.empty()) {
@@ -97,7 +97,7 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
     const sensor_msgs::ImageConstPtr& msg_right) {
   // Copy the ros image message to cv::Mat.
   cv_bridge::CvImageConstPtr cv_ptr_left;
-  cv::Mat T_W_C_opencv;
+  cv::Mat T_C_W_opencv;
 
   try {
     cv_ptr_left = cv_bridge::toCvShare(msg_left);
@@ -118,28 +118,28 @@ void OrbSlam2InterfaceStereo::stereoImageCallback(
     cv::remap(cv_ptr_left->image, imLeft, left_rectification_map1_, left_rectification_map2_, cv::INTER_LINEAR);
     cv::remap(cv_ptr_right->image, imRight, right_rectification_map1_, right_rectification_map2_, cv::INTER_LINEAR);
     // Handing the image to ORB slam for tracking
-    T_W_C_opencv = slam_system_->TrackStereo(imLeft, imRight,
+    T_C_W_opencv = slam_system_->TrackStereo(imLeft, imRight,
                                              cv_ptr_left->header.stamp.toSec());
   } else {
-    T_W_C_opencv =
+    T_C_W_opencv =
         slam_system_->TrackStereo(cv_ptr_left->image, cv_ptr_right->image,
                                   cv_ptr_left->header.stamp.toSec());
   }
 
   // If tracking successfull
-  if (!T_W_C_opencv.empty()) {
+  if (!T_C_W_opencv.empty()) {
     // Converting to kindr transform and publishing
-    Transformation T_W_C;
-    convertOrbSlamPoseToKindr(T_W_C_opencv, &T_W_C);
+    Transformation T_C_W;
+    convertOrbSlamPoseToKindr(T_C_W_opencv, &T_C_W);
 
     // Saving the transform to the member for publishing as a TF
     if (use_body_transform_) {
-      T_W_B_ = T_V_B_ * T_B_C_ * T_W_C.inverse();
+      T_W_B_ = T_B_C_ * T_C_W.inverse();
     } else {
-      T_W_B_ = T_W_C.inverse();
+      T_W_B_ = T_C_W.inverse();
     }
 
-    //publishCurrentPose(T_W_B_, msg_left->header);
+    publishCurrentPose(T_W_B_, msg_left->header);
   }
 }
 

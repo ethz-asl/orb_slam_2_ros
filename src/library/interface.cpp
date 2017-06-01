@@ -99,23 +99,30 @@ void OrbSlam2Interface::convertOrbSlamPoseToKindr(const cv::Mat& T_cv,
 void OrbSlam2Interface::getBodyTransform() {
   cv::FileStorage fsSettings(settings_file_path_, cv::FileStorage::READ);
 
-  cv::Mat T_C_B_opencv, T_B_V_opencv;
-  Transformation T_C_B, T_B_V;
+  cv::Mat T_C_B_opencv, T_C_I_opencv, T_I_B_opencv;
+  Transformation T_C_B, T_C_I, T_I_B;
 
-  fsSettings["T_LEFT_IMU"] >> T_C_B_opencv;
-  fsSettings["T_IMU_VICON"] >> T_B_V_opencv;
+  fsSettings["T_CAM0_BODY"] >> T_C_B_opencv;
+  fsSettings["T_CAM0_IMU"] >> T_C_I_opencv;
+  fsSettings["T_IMU_BODY"] >> T_I_B_opencv;
 
-  if (T_C_B_opencv.empty() || T_B_V_opencv.empty()) {
+  if (T_C_B_opencv.empty() && !T_I_B_opencv.empty())
+  {
+      ROS_WARN("EuRoC");
+      convertOrbSlamPoseToKindr(T_C_I_opencv, &T_C_I);
+      convertOrbSlamPoseToKindr(T_I_B_opencv, &T_I_B);
+
+      T_B_C_ = T_I_B.inverse() * T_C_I.inverse();// * T_I_B;
+  }
+  else if(T_I_B_opencv.empty())
+  {
     ROS_ERROR("Body to camera transform is missing!");
     use_body_transform_ = false;
-    return;
+  }else{
+      convertOrbSlamPoseToKindr(T_C_B_opencv, &T_C_B);
+      T_B_C_ = T_C_B.inverse();
   }
-
-  convertOrbSlamPoseToKindr(T_C_B_opencv, &T_C_B);
-  convertOrbSlamPoseToKindr(T_B_V_opencv, &T_B_V);
-  T_B_C_ = T_C_B.inverse();
-  T_V_B_ = T_B_V;
-
+    
   return;
 }
 

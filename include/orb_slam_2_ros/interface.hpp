@@ -78,9 +78,6 @@ class OrbSlam2Interface {
   // Transform frame names
   std::string frame_id_;
   std::string child_frame_id_;
-
-
-  Transformation T_V_B_;
   
 };
 
