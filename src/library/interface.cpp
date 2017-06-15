@@ -16,8 +16,7 @@ OrbSlam2Interface::OrbSlam2Interface(const ros::NodeHandle& nh,
       frame_id_(kDefaultFrameId),
       child_frame_id_(kDefaultChildFrameId),
       visualization_(kDefaultVisualization),
-      use_body_transform_(kDefaultUseBodyTransform),
-      use_imu_(kDefaultUseImu){
+      use_body_transform_(kDefaultUseBodyTransform){
 
   advertiseTopics();
   getParametersFromRos();
@@ -50,7 +49,6 @@ void OrbSlam2Interface::getParametersFromRos() {
   nh_private_.getParam("child_frame_id", child_frame_id_);
   nh_private_.getParam("visualization", visualization_);
   nh_private_.getParam("use_body_transform", use_body_transform_);
-  nh_private_.getParam("use_imu", use_imu_);
 }
 
 void OrbSlam2Interface::publishCurrentPose(const Transformation& T,
@@ -108,17 +106,18 @@ void OrbSlam2Interface::getBodyTransform() {
 
   if (T_C_B_opencv.empty() && !T_I_B_opencv.empty())
   {
-      ROS_WARN("EuRoC");
+      ROS_WARN("EuRoC Settings file");
       convertOrbSlamPoseToKindr(T_C_I_opencv, &T_C_I);
       convertOrbSlamPoseToKindr(T_I_B_opencv, &T_I_B);
 
-      T_B_C_ = T_I_B.inverse() * T_C_I.inverse();// * T_I_B;
+      T_B_C_ = T_I_B.inverse() * T_C_I.inverse();
   }
-  else if(T_I_B_opencv.empty())
+  else if(T_C_B_opencv.empty())
   {
     ROS_ERROR("Body to camera transform is missing!");
     use_body_transform_ = false;
   }else{
+      ROS_WARN("MAV Settings file");
       convertOrbSlamPoseToKindr(T_C_B_opencv, &T_C_B);
       T_B_C_ = T_C_B.inverse();
   }

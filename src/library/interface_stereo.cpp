@@ -35,7 +35,7 @@ void OrbSlam2InterfaceStereo::subscribeToTopics() {
       boost::bind(&OrbSlam2InterfaceStereo::stereoImageCallback, this, _1, _2));
 
 #ifdef USE_IMU
-  imu_sub_ = nh_.subscribe("/imu0",10,&OrbSlam2InterfaceStereo::ImuCallback, this);
+  imu_sub_ = nh_.subscribe("/imu",5,&OrbSlam2InterfaceStereo::ImuCallback, this);
 #endif
 }
 

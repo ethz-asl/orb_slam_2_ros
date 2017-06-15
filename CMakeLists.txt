@@ -9,7 +9,7 @@ catkin_simple(ALL_DEPS_REQUIRED)
 find_package(Eigen REQUIRED)
 include_directories(${Eigen_INCLUDE_DIRS})
 
-OPTION(USE_IMU "Using Imu" OFF)
+OPTION(USE_IMU "Using IMU" OFF)
 
 IF(USE_IMU)
     ADD_DEFINITIONS(-DUSE_IMU)
