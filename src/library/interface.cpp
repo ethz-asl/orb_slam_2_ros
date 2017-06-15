@@ -29,7 +29,7 @@ void OrbSlam2Interface::advertiseTopics() {
   T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>(
       "transform_cam", 1);
   // Creating a callback timer for TF publisher
-  tf_timer_ = nh_.createTimer(ros::Duration(0.01),
+  tf_timer_ = nh_.createTimer(ros::Duration(0.05),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);
 }
 
@@ -93,20 +93,31 @@ void OrbSlam2Interface::convertOrbSlamPoseToKindr(const cv::Mat& T_cv,
 void OrbSlam2Interface::getBodyTransform() {
   cv::FileStorage fsSettings(settings_file_path_, cv::FileStorage::READ);
 
-  cv::Mat T_C_B_opencv;
-  Transformation T_C_B;
+  cv::Mat T_C_B_opencv, T_C_I_opencv, T_I_B_opencv;
+  Transformation T_C_B, T_C_I, T_I_B;
 
-  fsSettings["T_c0_fcuimu"] >> T_C_B_opencv;
+  fsSettings["T_CAM0_BODY"] >> T_C_B_opencv;
+  fsSettings["T_CAM0_IMU"] >> T_C_I_opencv;
+  fsSettings["T_IMU_BODY"] >> T_I_B_opencv;
 
-  if (T_C_B_opencv.empty()) {
+  if (T_C_B_opencv.empty() && !T_I_B_opencv.empty())
+  {
+      ROS_WARN("EuRoC Settings file");
+      convertOrbSlamPoseToKindr(T_C_I_opencv, &T_C_I);
+      convertOrbSlamPoseToKindr(T_I_B_opencv, &T_I_B);
+
+      T_B_C_ = T_I_B.inverse() * T_C_I.inverse();
+  }
+  else if(T_C_B_opencv.empty())
+  {
     ROS_ERROR("Body to camera transform is missing!");
     use_body_transform_ = false;
-    return;
+  }else{
+      ROS_WARN("MAV Settings file");
+      convertOrbSlamPoseToKindr(T_C_B_opencv, &T_C_B);
+      T_B_C_ = T_C_B.inverse();
   }
-
-  convertOrbSlamPoseToKindr(T_C_B_opencv, &T_C_B);
-  T_B_C_ = T_C_B.inverse();
-
+    
   return;
 }
 

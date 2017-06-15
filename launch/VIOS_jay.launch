@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<launch>
+  <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen" >
+    <param name="interface_type" value="stereo" />
+    <param name="vocabulary_file_path" value="/home/raab/ros_vios/catkin_ws/build/orb_slam_2_catkin/orb_slam_2_src-prefix/src/orb_slam_2_src/Vocabulary/ORBvoc.txt" />
+    <param name="settings_file_path" value="/home/raab/ros_vios/catkin_ws/build/orb_slam_2_catkin/orb_slam_2_src-prefix/src/orb_slam_2_src/Settings/jay.yaml" />
+    <param name="visualization" type="bool" value="false" /> <!-- Disale when running on quadcotper -->
+    <param name="use_body_transform" type="bool" value="true" />
+    <remap from="camera/left/image_raw" to="/infrared/infrared" />
+    <remap from="camera/right/image_raw" to="/infrared2/infrared2" />
+    <remap from="/imu" to="/imu0" />
+  </node>
+
+</launch>
