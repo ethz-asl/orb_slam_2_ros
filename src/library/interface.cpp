@@ -100,24 +100,21 @@ void OrbSlam2Interface::getBodyTransform() {
   fsSettings["T_CAM0_IMU"] >> T_C_I_opencv;
   fsSettings["T_IMU_BODY"] >> T_I_B_opencv;
 
-  if (T_C_B_opencv.empty() && !T_I_B_opencv.empty())
-  {
-      ROS_WARN("EuRoC Settings file");
-      convertOrbSlamPoseToKindr(T_C_I_opencv, &T_C_I);
-      convertOrbSlamPoseToKindr(T_I_B_opencv, &T_I_B);
+  if (T_C_B_opencv.empty() && !T_I_B_opencv.empty()) {
+    ROS_WARN("EuRoC Settings file");
+    convertOrbSlamPoseToKindr(T_C_I_opencv, &T_C_I);
+    convertOrbSlamPoseToKindr(T_I_B_opencv, &T_I_B);
 
-      T_B_C_ = T_I_B.inverse() * T_C_I.inverse();
-  }
-  else if(T_C_B_opencv.empty())
-  {
+    T_B_C_ = T_I_B.inverse() * T_C_I.inverse();
+  } else if (T_C_B_opencv.empty()) {
     ROS_ERROR("Body to camera transform is missing!");
     use_body_transform_ = false;
-  }else{
-      ROS_WARN("MAV Settings file");
-      convertOrbSlamPoseToKindr(T_C_B_opencv, &T_C_B);
-      T_B_C_ = T_C_B.inverse();
+  } else {
+    ROS_WARN("MAV Settings file");
+    convertOrbSlamPoseToKindr(T_C_B_opencv, &T_C_B);
+    T_B_C_ = T_C_B.inverse();
   }
-    
+
   return;
 }
 
