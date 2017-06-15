@@ -8,5 +8,5 @@ VIOS: https://github.com/russellaabuchanan/orb_slam_2_catkin
 
 When building for VIOS make sure to set the USE_IMU tag, for example:
 ```
-catkin build orb_slam_2_ros -DUSE_IMU=ON
+catkin build orb_slam_2_ros -DUSE_IMU=ON -DCMAKE_BUILD_TYPE=Release
 ```
