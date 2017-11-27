@@ -5,6 +5,13 @@
     <param name="interface_type" value="rgbd" />
     <param name="vocabulary_file_path" value="" />
     <param name="settings_file_path" value="" />
-  </node>
+    <!-- optional parameters -->
+    <!-- set frames here
+    <param name="verbose" value="" />
+    <param name="frame_id" value="" />
+    <param name="child_frame_id" value="" />
+	-->
+  
+</node>
 
 </launch>
