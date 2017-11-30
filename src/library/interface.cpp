@@ -63,6 +63,7 @@ void OrbSlam2Interface::publishCurrentMap(const std::vector<ORB_SLAM2::MapPoint 
   // Creating message
   Map_.points.clear();
   Map_.header.stamp = msg_rgb->header.stamp;
+  Map_.header.frame_id = "map";
 
     for(size_t i = 0; i < point_cloud.size(); i++){
 
