@@ -76,6 +76,8 @@ void OrbSlam2InterfaceRGBD::rgbdImageCallback(
 
   }
 
+  publishLoopInfo(slam_system_->IsRunningGBA());
+
 }
 
 }  // namespace orb_slam_2_interface

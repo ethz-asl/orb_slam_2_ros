@@ -25,6 +25,8 @@ void OrbSlam2Interface::advertiseTopics() {
   T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>(
       "transform_cam", 1);
   Map_pub_ = nh_private_.advertise<sensor_msgs::PointCloud>("slam_map", 1);
+
+    Loop_info_ = nh_private_.advertise<std_msgs::Bool>("loop_info", 1);
   // Creating a callback timer for TF publisher
   tf_timer_ = nh_.createTimer(ros::Duration(0.01),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);
@@ -82,6 +84,14 @@ void OrbSlam2Interface::publishCurrentMap(const std::vector<ORB_SLAM2::MapPoint 
     }
 
       Map_pub_.publish(Map_);
+
+    }
+
+
+    void OrbSlam2Interface::publishLoopInfo(bool isGBArunning){
+
+      GBA_running_.data = isGBArunning;
+      Loop_info_.publish(GBA_running_);
 
     }
 

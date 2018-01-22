@@ -9,6 +9,7 @@
 #include <ros/ros.h>
 #include <sensor_msgs/Image.h>
 #include <sensor_msgs/PointCloud.h>
+#include <std_msgs/Bool.h>
 #include <tf/transform_broadcaster.h>
 #include <Eigen/Geometry>
 
@@ -46,6 +47,8 @@ class OrbSlam2Interface {
   void publishCurrentMap(const std::vector<ORB_SLAM2::MapPoint *> &point_cloud,
                          const sensor_msgs::ImageConstPtr& msg_rgb);
 
+    void publishLoopInfo(bool isGBArunning);
+
 
   // Helper functions
   void convertOrbSlamPoseToKindr(const cv::Mat& T_cv, Transformation* T_kindr);
@@ -59,6 +62,7 @@ class OrbSlam2Interface {
   tf::TransformBroadcaster tf_broadcaster_;
   ros::Timer tf_timer_;
   ros::Publisher Map_pub_;
+    ros::Publisher Loop_info_;
 
 
   // The orb slam system
@@ -68,6 +72,8 @@ class OrbSlam2Interface {
   Transformation T_W_C_;
 
   sensor_msgs::PointCloud Map_;
+
+    std_msgs::Bool GBA_running_;
 
 
   // Parameters
