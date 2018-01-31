@@ -31,3 +31,7 @@
 # Project Files
 .clang_complete
 \.project
+
+\.idea/
+
+cmake-build-debug/

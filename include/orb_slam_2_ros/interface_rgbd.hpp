@@ -32,6 +32,9 @@ class OrbSlam2InterfaceRGBD : public OrbSlam2Interface {
   void rgbdImageCallback(const sensor_msgs::ImageConstPtr& msg_rgb,
                            const sensor_msgs::ImageConstPtr& msg_depth);
 
+
+
+
   // Subscribers
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> rgb_sub_;
   std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>> depth_sub_;

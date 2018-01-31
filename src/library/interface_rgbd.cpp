@@ -64,7 +64,19 @@ void OrbSlam2InterfaceRGBD::rgbdImageCallback(
     publishCurrentPose(T_W_C, msg_rgb->header);
     // Saving the transform to the member for publishing as a TF
     T_W_C_ = T_W_C;
+
+    // Publish current ros point cloud (map) every 30 images
+    //TODO improve performance by getting the newly added points only instead of all map points
+    image_counter++;
+    if ( image_counter>30 ) {
+        image_counter = 0;
+        //const std::vector<ORB_SLAM2::MapPoint *> &point_cloud = slam_system_->mpMap->GetAllMapPoints();
+        publishCurrentMap(slam_system_->mpMap->GetAllMapPoints(), msg_rgb);
+    }
+
   }
+
+  publishLoopInfo(slam_system_->IsRunningGBA());
 
 }
 
