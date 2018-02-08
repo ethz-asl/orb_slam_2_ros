@@ -47,7 +47,9 @@ class OrbSlam2Interface {
   void publishCurrentMap(const std::vector<ORB_SLAM2::MapPoint *> &point_cloud,
                          const sensor_msgs::ImageConstPtr& msg_rgb);
 
-    void publishLoopInfo(bool isGBArunning);
+    void publishGBArunning(bool isGBArunning);
+    void publishLoopClosing(bool loop_closing);
+    void publishEssentialGraphOptimization(bool essential_graph_optimization);
 
 
   // Helper functions
@@ -62,7 +64,9 @@ class OrbSlam2Interface {
   tf::TransformBroadcaster tf_broadcaster_;
   ros::Timer tf_timer_;
   ros::Publisher Map_pub_;
-    ros::Publisher Loop_info_;
+    ros::Publisher GBA_info_;
+    ros::Publisher Loop_closing_info_;
+    ros::Publisher Essential_graph_info_;
 
 
   // The orb slam system
@@ -74,6 +78,9 @@ class OrbSlam2Interface {
   sensor_msgs::PointCloud Map_;
 
     std_msgs::Bool GBA_running_;
+    std_msgs::Bool loop_closing_;
+    std_msgs::Bool essential_graph_optimization_;
+
 
 
   // Parameters
