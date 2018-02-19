@@ -1,12 +1,41 @@
 <?xml version="1.0"?>
 <launch>
 
-  <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen" >
+  <!-- Path of the file containing the ORB vocabulary. -->
+  <arg name="vocabulary_file_path">
+  <!-- Path of the file containing ORB SLAM2 configuration. -->
+  <arg name="orb_slam2_settings_file_path" default = "$(find orb_slam_2_ros)/config/euroc/euroc.yaml">
+    <!-- Path of the file containing camera calibration. -->
+  <arg name="camera_calibration_file_path" default = "$(find orb_slam_2_ros)/config/euroc/camchain.yaml">
+
+  <!-- ORB SLAM2 stereo. -->
+  <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen">
+
     <param name="interface_type" value="stereo" />
-    <param name="vocabulary_file_path" value="/home/millanea/trunk/datasets/kitti/raw/ORBvoc.txt" />
-    <param name="settings_file_path" value="/home/millanea/trunk/datasets/kitti/raw/2011_09_30_drive_18/KITTI00-02_stereo.yaml" />
-    <remap from="camera/left/image_raw" to="/cam00/image_raw" />
-    <remap from="camera/right/image_raw" to="/cam01/image_raw" />
+
+    <param name="vocabulary_file_path" value="$(arg vocabulary_file_path)"/>
+    <param name="settings_file_path" value="$(arg orb_slam2_settings_file_path)"/>
+    <param name="visualization" type="bool" value="true"/>
+    <remap from="camera/left/image_raw" to="/rect/first/image"/>
+    <remap from="camera/right/image_raw" to="/rect/second/image"/>
+    <param name="rectify_input_images" type="bool" value="false"/>
+
+  </node>
+
+  <!-- Stereo image rectification. -->
+  <node name="stereo_undistort" pkg="image_undistort" type="stereo_undistort_node">
+
+    <param name="input_camera_info_from_ros_params" value = "true"/>
+    <param name="first_camera_namespace" value="cam0"/>
+    <param name="second_camera_namespace" value="cam1"/>
+    <param name="scale" value="1.0"/>
+    <param name="process_every_nth_frame" value="1"/>
+
+    <rosparam file="$(arg camera_calibration_file_path)"/>
+
+    <remap from="raw/first/image" to="/cam0/image_raw"/>
+    <remap from="raw/second/image" to="/cam1/image_raw"/>
+
   </node>
 
 </launch>
