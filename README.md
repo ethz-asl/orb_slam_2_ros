@@ -62,4 +62,4 @@ Run the main node with
 
     roslaunch orb_slam_2_ros run_orb_slam_2.launch vocabulary_file_path:=<PATH_TO_EXTRACTED_ORB_SLAM2_VOCABULARY>
 
-Please not that this version of orb_slam_2_ros **DOES NOT** rectify images, that is why we are using  [stereo_undistort_node](https://github.com/ethz-asl/image_undistort#stereo_undistort_node) to undistort images.
+Please not that this version of orb_slam_2_ros **DOES NOT** rectify images, that is why we are using  [stereo_undistort_node](https://github.com/ethz-asl/image_undistort#stereo_undistort_node).
