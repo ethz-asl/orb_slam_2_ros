@@ -24,27 +24,35 @@ Make sure you have added your SSH keys to your Github account. For more info che
 
 - [Robot Operating System (ROS)](http://wiki.ros.org) (middleware for robotics),
 - [catkin_simple](https://github.com/catkin/catkin_simple)
-        ```cd catkin_workspace/src
-           git clone git@github.com:catkin/catkin_simple.git # cloning over SSH (github account needed)
-           # git clone https://github.com/catkin/catkin_simple.git # cloning over HTTPS (no github account needed) ```
+	```
+	cd ~/catkin_workspace/src
+	git clone git@github.com:catkin/catkin_simple.git # cloning over SSH (github account needed)
+	# git clone https://github.com/catkin/catkin_simple.git # cloning over HTTPS (no github account needed)
+	```
 - [catkinized version of the orb_slam_2](https://github.com/ethz-asl/orb_slam_2_catkin)
-		```cd catkin_workspace/src
-		   git clone git@github.com:ethz-asl/orb_slam_2_catkin.git # cloning over SSH (github account needed)
-		   # git clone https://github.com/ethz-asl/orb_slam_2_catkin.git # cloning over HTTPS (no github account needed) ```
+	```
+	cd ~/catkin_workspace/src
+	git clone git@github.com:ethz-asl/orb_slam_2_catkin.git # cloning over SSH (github account needed)
+	# git clone https://github.com/ethz-asl/orb_slam_2_catkin.git # cloning over HTTPS (no github account needed)
+	```
 - [image_undistort](https://github.com/ethz-asl/image_undistort)
-        ```cd catkin_workspace/src
-           git clone git@github.com:ethz-asl/image_undistort.git # cloning over SSH (github account needed)
-           # git clone https://github.com/ethz-asl/image_undistort.git # cloning over HTTPS (no github account needed) ```
+	```
+	cd ~/catkin_workspace/src
+	git clone git@github.com:ethz-asl/image_undistort.git # cloning over SSH (github account needed)
+	# git clone https://github.com/ethz-asl/image_undistort.git # cloning over HTTPS (no github account needed) 
+	```
 - [pangoli_catkin](https://github.com/ethz-asl/pangolin_catkin)
-        ```cd catkin_workspace/src
-           git clone git@github.com:uzh-rpg/pangolin_catkin.git # cloning over SSH (github account needed)
-           # git clone https://github.com/ethz-asl/pangolin_catkin.git # cloning over HTTPS (no github account needed) ```
+	```
+	cd ~/catkin_workspace/src
+	git clone git@github.com:uzh-rpg/pangolin_catkin.git # cloning over SSH (github account needed)
+	# git clone https://github.com/ethz-asl/pangolin_catkin.git # cloning over HTTPS (no github account needed) 
+	```
 
 ### Building
 
 To build from source, clone the latest version from this repository into your catkin workspace and compile the package using
 
-	cd catkin_workspace/src
+	cd ~/catkin_workspace/src
 	git clone git@github.com:ethz-asl/orb_slam_2_ros.git # cloning over SSH (github account needed)
     # git clone https://github.com/ethz-asl/orb_slam_2_ros.git # cloning over HTTPS (no github account needed)
 	cd ../
