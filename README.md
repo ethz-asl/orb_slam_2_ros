@@ -62,12 +62,16 @@ To build from source, clone the latest version from this repository into your ca
 By building the higher level package orb_slam_2_ros you will even compile its dependencies. This includes the compilation of orb_slam_2_catkin, which will **automatically** install the original library ORB_SLAM2 in your system, meaning you **do not need** to do anything else to then use ORB_SLAM2.
 
 ## Usage
-Before launching the node with an example dataset you need to:
- - Download a dataset you can use to run this package from [EUROC](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets) (for example the one called "Machine Hall 001") (containing rosbag to play and camera calibration);
- - Download and extract the [ORB_SLAM2 vocabulary](https://github.com/raulmur/ORB_SLAM2/blob/master/Vocabulary/ORBvoc.txt.tar.gz).
 
-Run the main node with
+**PART UNDER REVIEW! DO NOT USE THE FOLLOWING CODE AS IT DOES NOT WORK YET!**
+
+
+~~Before launching the node with an example dataset you need to:~~
+ - ~~Download a dataset you can use to run this package from [EUROC](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets) (for example the one called "Machine Hall 001") (containing rosbag to play and camera calibration)~~;
+ - ~~Download and extract the [ORB_SLAM2 vocabulary](https://github.com/raulmur/ORB_SLAM2/blob/master/Vocabulary/ORBvoc.txt.tar.gz)~~.
+
+~~Run the main node with~~
 
     roslaunch orb_slam_2_ros run_orb_slam_2.launch vocabulary_file_path:=<PATH_TO_EXTRACTED_ORB_SLAM2_VOCABULARY>
 
-Please not that this version of orb_slam_2_ros **DOES NOT** rectify images, that is why we are using  [stereo_undistort_node](https://github.com/ethz-asl/image_undistort#stereo_undistort_node).
+~~Please not that this version of orb_slam_2_ros **DOES NOT** rectify images, that is why we are using  [stereo_undistort_node](https://github.com/ethz-asl/image_undistort#stereo_undistort_node)~~.
