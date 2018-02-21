@@ -76,7 +76,9 @@ void OrbSlam2InterfaceRGBD::rgbdImageCallback(
 
   }
 
-  publishLoopInfo(slam_system_->IsRunningGBA());
+    publishGBArunning(slam_system_->IsRunningGBA());
+    publishLoopClosing(slam_system_->IsRunningLoopClosing());
+    publishEssentialGraphOptimization(slam_system_->IsRunningEssentialGraphOptimization());
 
 }
 

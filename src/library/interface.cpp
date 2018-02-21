@@ -26,7 +26,10 @@ void OrbSlam2Interface::advertiseTopics() {
       "transform_cam", 1);
   Map_pub_ = nh_private_.advertise<sensor_msgs::PointCloud>("slam_map", 1);
 
-    Loop_info_ = nh_private_.advertise<std_msgs::Bool>("loop_info", 1);
+    GBA_info_ = nh_private_.advertise<std_msgs::Bool>("GBA_info", 1);
+    Loop_closing_info_ = nh_private_.advertise<std_msgs::Bool>("loop_closing_info",1);
+    Essential_graph_info_ = nh_private_.advertise<std_msgs::Bool>("essential_graph_info",1);
+
   // Creating a callback timer for TF publisher
   tf_timer_ = nh_.createTimer(ros::Duration(0.01),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);
@@ -88,11 +91,21 @@ void OrbSlam2Interface::publishCurrentMap(const std::vector<ORB_SLAM2::MapPoint 
     }
 
 
-    void OrbSlam2Interface::publishLoopInfo(bool isGBArunning){
+    void OrbSlam2Interface::publishGBArunning(bool isGBArunning){
 
       GBA_running_.data = isGBArunning;
-      Loop_info_.publish(GBA_running_);
+      GBA_info_.publish(GBA_running_);
 
+    }
+
+    void OrbSlam2Interface::publishLoopClosing(bool loop_closing) {
+        loop_closing_.data = loop_closing;
+        Loop_closing_info_.publish(loop_closing_);
+    }
+
+    void OrbSlam2Interface::publishEssentialGraphOptimization(bool essential_graph_optimization) {
+        essential_graph_optimization_.data = essential_graph_optimization;
+        Essential_graph_info_.publish(essential_graph_optimization_);
     }
 
 void OrbSlam2Interface::publishCurrentPoseAsTF(const ros::TimerEvent& event) {
