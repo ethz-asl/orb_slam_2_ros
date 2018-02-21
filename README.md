@@ -2,7 +2,7 @@
 
 ## Overview
 
-This package integrates orb_slam_2 into ROS in a more user friendly way than what is offered by the original library [ORB_SLAM2](https://github.com/raulmur/ORB_SLAM2)
+This package integrates orb_slam_2 into ROS in what we believe to be a more user friendly way than what is offered by the original library [ORB_SLAM2](https://github.com/raulmur/ORB_SLAM2)
 
 **Keywords:** ROS, ORB_SLAM2, SLAM
 
