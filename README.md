@@ -8,7 +8,7 @@ This package integrates orb_slam_2 into ROS in what we believe to be a more user
 
 ### License
 
-The source code is released under a [TODO @alexmillane insert license](put_link_here).
+The source code is released under a [GPLv3 license](https://github.com/raulmur/ORB_SLAM2/blob/master/License-gpl.txt) as is the underlying library [ORB_SLAM2](https://github.com/raulmur/ORB_SLAM2).
 
 **Author(s): Alex Millane
 Maintainer: Alex Millane
