@@ -2,11 +2,16 @@
 <launch>
 
   <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen" >
-    <param name="interface_type" value="stereo" />
-    <param name="vocabulary_file_path" value="/home/millanea/trunk/datasets/kitti/raw/ORBvoc.txt" />
-    <param name="settings_file_path" value="/home/millanea/trunk/datasets/kitti/raw/2011_09_30_drive_18/KITTI00-02_stereo.yaml" />
-    <remap from="camera/left/image_raw" to="/cam00/image_raw" />
-    <remap from="camera/right/image_raw" to="/cam01/image_raw" />
-  </node>
+    <param name="interface_type" value="rgbd" />
+    <param name="vocabulary_file_path" value="" />
+    <param name="settings_file_path" value="" />
+    <!-- optional parameters -->
+    <!-- set frames here
+    <param name="verbose" value="" />
+    <param name="frame_id" value="" />
+    <param name="child_frame_id" value="" />
+	-->
+  
+</node>
 
 </launch>

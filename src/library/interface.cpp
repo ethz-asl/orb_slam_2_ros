@@ -24,6 +24,12 @@ void OrbSlam2Interface::advertiseTopics() {
   // Advertising topics
   T_pub_ = nh_private_.advertise<geometry_msgs::TransformStamped>(
       "transform_cam", 1);
+  Map_pub_ = nh_private_.advertise<sensor_msgs::PointCloud>("slam_map", 1);
+
+    GBA_info_ = nh_private_.advertise<std_msgs::Bool>("GBA_info", 1);
+    Loop_closing_info_ = nh_private_.advertise<std_msgs::Bool>("loop_closing_info",1);
+    Essential_graph_info_ = nh_private_.advertise<std_msgs::Bool>("essential_graph_info",1);
+
   // Creating a callback timer for TF publisher
   tf_timer_ = nh_.createTimer(ros::Duration(0.01),
                               &OrbSlam2Interface::publishCurrentPoseAsTF, this);
@@ -54,6 +60,53 @@ void OrbSlam2Interface::publishCurrentPose(const Transformation& T,
   // Publishing the current transformation.
   T_pub_.publish(msg);
 }
+
+ // Publish orbslam2 map to ros point cloud
+void OrbSlam2Interface::publishCurrentMap(const std::vector<ORB_SLAM2::MapPoint *>
+                                          &point_cloud, const sensor_msgs::ImageConstPtr& msg_rgb) {
+
+  // Creating message
+  Map_.points.clear();
+  Map_.header.stamp = msg_rgb->header.stamp;
+  Map_.header.frame_id = "map";
+
+    for(size_t i = 0; i < point_cloud.size(); i++){
+
+      if (point_cloud[i]->isBad()){
+        continue;
+      }
+
+      cv::Mat pos = point_cloud[i]->GetWorldPos();
+      geometry_msgs::Point32 pp;
+      pp.x = pos.at<float> ( 0 );
+      pp.y = pos.at<float> ( 1 );
+      pp.z = pos.at<float> ( 2 );
+
+      Map_.points.push_back ( pp );
+
+    }
+
+      Map_pub_.publish(Map_);
+
+    }
+
+
+    void OrbSlam2Interface::publishGBArunning(bool isGBArunning){
+
+      GBA_running_.data = isGBArunning;
+      GBA_info_.publish(GBA_running_);
+
+    }
+
+    void OrbSlam2Interface::publishLoopClosing(bool loop_closing) {
+        loop_closing_.data = loop_closing;
+        Loop_closing_info_.publish(loop_closing_);
+    }
+
+    void OrbSlam2Interface::publishEssentialGraphOptimization(bool essential_graph_optimization) {
+        essential_graph_optimization_.data = essential_graph_optimization;
+        Essential_graph_info_.publish(essential_graph_optimization_);
+    }
 
 void OrbSlam2Interface::publishCurrentPoseAsTF(const ros::TimerEvent& event) {
   tf::Transform tf_transform;

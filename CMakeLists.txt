@@ -13,6 +13,7 @@ cs_add_library(orb_slam_2_interface
   src/library/interface.cpp
   src/library/interface_mono.cpp
   src/library/interface_stereo.cpp
+  src/library/interface_rgbd.cpp
 )
 
 cs_add_executable(orb_slam_2_ros_node
