@@ -19,7 +19,9 @@ OrbSlam2InterfaceMono::OrbSlam2InterfaceMono(const ros::NodeHandle& nh,
 
 void OrbSlam2InterfaceMono::subscribeToTopics() {
   // Subscribing to the required data topics
-  image_sub_ = nh_.subscribe("camera/image_raw", 1,
+  int queue_size = kDefaultMonoQueueSize;
+  nh_private_.param("queue_size", queue_size, queue_size);
+  image_sub_ = nh_.subscribe("camera/image_raw", queue_size,
                              &OrbSlam2InterfaceMono::imageCallback, this);
 }
 

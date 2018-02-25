@@ -18,15 +18,18 @@ OrbSlam2InterfaceStereo::OrbSlam2InterfaceStereo(const ros::NodeHandle& nh,
 
 void OrbSlam2InterfaceStereo::subscribeToTopics() {
   // Subscribing to the stereo images
+  // Subscribing to the input pointcloud
+  int queue_size = kDefaultStereoQueueSize;
+  nh_private_.param("queue_size", queue_size, queue_size);
   left_sub_ = std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>>(
       new message_filters::Subscriber<sensor_msgs::Image>(
-          nh_, "camera/left/image_raw", 1));
+          nh_, "camera/left/image_raw", queue_size));
   right_sub_ = std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>>(
       new message_filters::Subscriber<sensor_msgs::Image>(
-          nh_, "camera/right/image_raw", 1));
+          nh_, "camera/right/image_raw", queue_size));
   // Creating a synchronizer
   sync_ = std::shared_ptr<message_filters::Synchronizer<sync_pol>>(
-      new message_filters::Synchronizer<sync_pol>(sync_pol(10), *left_sub_,
+      new message_filters::Synchronizer<sync_pol>(sync_pol(queue_size), *left_sub_,
                                                   *right_sub_));
   // Registering the synchronized image callback
   sync_->registerCallback(

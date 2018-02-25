@@ -18,15 +18,17 @@ OrbSlam2InterfaceRGBD::OrbSlam2InterfaceRGBD(const ros::NodeHandle& nh,
 
 void OrbSlam2InterfaceRGBD::subscribeToTopics() {
   // Subscribing to the rgbd images
+  int queue_size = kDefaultRgbdQueueSize;
+  nh_private_.param("queue_size", queue_size, queue_size);
   rgb_sub_ = std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>>(
       new message_filters::Subscriber<sensor_msgs::Image>(
-          nh_, "/camera/rgb/image_raw", 1));
+          nh_, "/camera/rgb/image_raw", queue_size));
   depth_sub_ = std::shared_ptr<message_filters::Subscriber<sensor_msgs::Image>>(
       new message_filters::Subscriber<sensor_msgs::Image>(
-          nh_, "camera/depth_registered/image_raw", 1));
+          nh_, "camera/depth_registered/image_raw", queue_size));
   // Creating a synchronizer
   sync_ = std::shared_ptr<message_filters::Synchronizer<sync_pol>>(
-      new message_filters::Synchronizer<sync_pol>(sync_pol(10), *rgb_sub_,
+      new message_filters::Synchronizer<sync_pol>(sync_pol(queue_size), *rgb_sub_,
                                                   *depth_sub_));
   // Registering the synchronized image callback
   sync_->registerCallback(

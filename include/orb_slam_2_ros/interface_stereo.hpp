@@ -12,6 +12,9 @@
 
 namespace orb_slam_2_interface {
 
+// Defaults
+constexpr int kDefaultStereoQueueSize = 1;
+
 // The synchronization policy used by the interface to sync stereo images
 typedef message_filters::sync_policies::ApproximateTime<sensor_msgs::Image,
                                                         sensor_msgs::Image>

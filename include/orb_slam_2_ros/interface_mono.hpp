@@ -8,6 +8,9 @@
 
 namespace orb_slam_2_interface {
 
+// Defaults
+constexpr int kDefaultMonoQueueSize = 1;
+
 // Class handling global alignment calculation and publishing
 class OrbSlam2InterfaceMono : public OrbSlam2Interface {
  public:
