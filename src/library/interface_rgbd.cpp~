@@ -13,7 +13,7 @@ OrbSlam2InterfaceRGBD::OrbSlam2InterfaceRGBD(const ros::NodeHandle& nh,
   //getParametersFromRos();
   slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
       new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
-                            ORB_SLAM2::System::RGBD, true));
+                            ORB_SLAM2::System::RGBD, false));
 }
 
 void OrbSlam2InterfaceRGBD::subscribeToTopics() {
