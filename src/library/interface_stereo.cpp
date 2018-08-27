@@ -6,7 +6,7 @@ namespace orb_slam_2_interface {
 
 OrbSlam2InterfaceStereo::OrbSlam2InterfaceStereo(const ros::NodeHandle& nh,
                                              const ros::NodeHandle& nh_private,
-                                             const bool& visualization)
+                                             const bool visualization)
     : OrbSlam2Interface(nh, nh_private) {
   // Getting data and params
   subscribeToTopics();
