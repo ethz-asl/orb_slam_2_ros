@@ -11,15 +11,15 @@
 // A factory method for creating an interface
 std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> create_interface(
     std::string interface_type, const ros::NodeHandle& nh,
-    const ros::NodeHandle& nh_private) {
+    const ros::NodeHandle& nh_private, const bool visualization) {
   // Creating the aligner object subclass dependent on the argument
   std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> interface;
   if (interface_type == "mono") {
     interface = std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface>(
-        new orb_slam_2_interface::OrbSlam2InterfaceMono(nh, nh_private));
+        new orb_slam_2_interface::OrbSlam2InterfaceMono(nh, nh_private, visualization));
   } else if (interface_type == "stereo") {
     interface = std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface>(
-        new orb_slam_2_interface::OrbSlam2InterfaceStereo(nh, nh_private));
+        new orb_slam_2_interface::OrbSlam2InterfaceStereo(nh, nh_private, visualization));
   } else {
     ROS_FATAL(
         "interface type not recognized. Must be mono or stereo.");
@@ -43,9 +43,11 @@ int main(int argc, char** argv) {
   static const std::string kDefaultInterfaceType = "mono";
   std::string interface_type = kDefaultInterfaceType;
   nh_private.getParam("interface_type", interface_type);
+  bool visualization = false;
+  nh_private.getParam("visualization", visualization);
   // Creating the interface object to do the work
   std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> interface =
-      create_interface(interface_type, nh, nh_private);
+      create_interface(interface_type, nh, nh_private, visualization);
   // Spinning
   ros::spin();
   // Exit tranquilly

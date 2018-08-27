@@ -5,7 +5,8 @@
 namespace orb_slam_2_interface {
 
 OrbSlam2InterfaceMono::OrbSlam2InterfaceMono(const ros::NodeHandle& nh,
-                                             const ros::NodeHandle& nh_private)
+                                             const ros::NodeHandle& nh_private,
+                                             const bool visualization)
     : OrbSlam2Interface(nh, nh_private) {
   // Getting data and params
   subscribeToTopics();
@@ -14,7 +15,7 @@ OrbSlam2InterfaceMono::OrbSlam2InterfaceMono(const ros::NodeHandle& nh,
   // Creating the SlAM system
   slam_system_ = std::shared_ptr<ORB_SLAM2::System>(
       new ORB_SLAM2::System(vocabulary_file_path_, settings_file_path_,
-                            ORB_SLAM2::System::MONOCULAR, true));
+                            ORB_SLAM2::System::MONOCULAR, visualization));
 }
 
 void OrbSlam2InterfaceMono::subscribeToTopics() {
