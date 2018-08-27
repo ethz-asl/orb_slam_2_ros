@@ -14,7 +14,7 @@ class OrbSlam2InterfaceMono : public OrbSlam2Interface {
   // Constructor
   OrbSlam2InterfaceMono(const ros::NodeHandle& nh,
                         const ros::NodeHandle& nh_private,
-                        const bool& visualization);
+                        const bool visualization);
 
  protected:
   // Subscribes to the appropriate ROS topics
