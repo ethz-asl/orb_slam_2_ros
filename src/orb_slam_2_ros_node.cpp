@@ -11,7 +11,7 @@
 // A factory method for creating an interface
 std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> create_interface(
     std::string interface_type, const ros::NodeHandle& nh,
-    const ros::NodeHandle& nh_private, const bool& visualization) {
+    const ros::NodeHandle& nh_private, const bool visualization) {
   // Creating the aligner object subclass dependent on the argument
   std::unique_ptr<orb_slam_2_interface::OrbSlam2Interface> interface;
   if (interface_type == "mono") {
