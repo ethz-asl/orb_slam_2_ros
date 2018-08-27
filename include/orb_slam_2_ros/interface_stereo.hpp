@@ -23,7 +23,7 @@ class OrbSlam2InterfaceStereo : public OrbSlam2Interface {
   // Constructor
   OrbSlam2InterfaceStereo(const ros::NodeHandle& nh,
                           const ros::NodeHandle& nh_private,
-                          const bool& visualization);
+                          const bool visualization);
 
  protected:
   // Subscribes to the appropriate ROS topics
