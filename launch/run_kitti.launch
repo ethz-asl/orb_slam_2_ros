@@ -1,0 +1,27 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Path of the file containing the ORB vocabulary. -->
+  <arg name="vocabulary_file_path"  default = "$(env HOME)/trunk/datasets/kitti/2011_09_30_drive_18/ORBvoc.txt"/>
+  <!-- Path of the file containing ORB SLAM2 configuration. -->
+  <arg name="orb_slam2_settings_file_path" default = "$(find orb_slam_2_ros)/config/stereo/kitti/KITTI04-12.yaml"/>
+
+  <param name="use_sim_time" value="true" />
+
+  <!-- ORB SLAM2 stereo. -->
+  <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen">
+
+    <param name="interface_type" value="stereo" />
+
+    <param name="vocabulary_file_path" value="$(arg vocabulary_file_path)"/>
+    <param name="settings_file_path" value="$(arg orb_slam2_settings_file_path)"/>
+    <param name="visualization" type="bool" value="true"/>
+    <remap from="camera/left/image_raw" to="/cam00/image_raw"/>
+    <remap from="camera/right/image_raw" to="/cam01/image_raw"/>
+
+    <param name="frame_id" value="odom"/>
+    <param name="child_frame_id" value="cam00"/>
+
+  </node>
+
+</launch>
