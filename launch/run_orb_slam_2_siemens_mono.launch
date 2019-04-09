@@ -24,7 +24,7 @@
   <!-- Stereo image rectification. -->
   <node name="image_undistort" pkg="image_undistort" type="image_undistort_node">
     <param name="input_camera_info_from_ros_params" value="false"/>
-    <param name="scale" value="1.0"/>
+    <param name="scale" value="0.5"/>
     <param name="process_every_nth_frame" value="1"/>
 
     <remap from="input/image" to="$(arg republished_topic_1)"/>
