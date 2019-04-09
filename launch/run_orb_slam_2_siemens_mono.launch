@@ -2,9 +2,9 @@
 <launch>
 
   <!-- Path of the file containing the ORB vocabulary. -->
-  <arg name="vocabulary_file_path" default = "/home/spadmin/catkin_ws/build/orb_slam_2_catkin/orb_slam_2_src-prefix/src/orb_slam_2_src/Vocabulary/ORBvoc.txt"/>
+  <arg name="vocabulary_file_path" default = "/$(env HOME)/catkin_ws/build/orb_slam_2_catkin/orb_slam_2_src-prefix/src/orb_slam_2_src/Vocabulary/ORBvoc.txt"/>
   <!-- Path of the file containing ORB SLAM2 configuration. -->
-  <arg name="orb_slam2_settings_file_path" default = "/home/spadmin/calibration/ORB_SLAM2/30cm_2018-08-21.yaml"/>
+  <arg name="orb_slam2_settings_file_path" default = "$(find orb_slam_2_ros)/share/siemens_mono.yaml"/>
 
   <arg name="compressed_topic_1" default="/bas_0/image_color"/>
   <arg name="republished_topic_1" default="/bas_0/image_color"/>
