@@ -1,0 +1,40 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Path of the file containing the ORB vocabulary. -->
+  <arg name="vocabulary_file_path" default = "/home/spadmin/catkin_ws/build/orb_slam_2_catkin/orb_slam_2_src-prefix/src/orb_slam_2_src/Vocabulary/ORBvoc.txt"/>
+  <!-- Path of the file containing ORB SLAM2 configuration. -->
+  <arg name="orb_slam2_settings_file_path" default = "/home/spadmin/calibration/ORB_SLAM2/100cm_2018-08-21.yaml"/>
+  <!-- Path of the file containing camera calibration. -->
+  <arg name="camera_calibration_file_path" default = "/home/spadmin/calibration/arduino_vi2/2018-08-21/100cm/camchain-static_2018-08-21-13-59-32_imucorr.yaml"/>
+
+  <!-- ORB SLAM2 stereo. -->
+  <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen">
+
+    <param name="interface_type" value="stereo" />
+
+    <param name="vocabulary_file_path" value="$(arg vocabulary_file_path)"/>
+    <param name="settings_file_path" value="$(arg orb_slam2_settings_file_path)"/>
+    <param name="visualization" type="bool" value="true"/>
+    <remap from="camera/left/image_raw" to="/rect/second/image"/>
+    <remap from="camera/right/image_raw" to="/rect/first/image"/>
+
+  </node>
+
+  <!-- Stereo image rectification. -->
+  <node name="stereo_undistort" pkg="image_undistort" type="stereo_undistort_node">
+
+    <param name="input_camera_info_from_ros_params" value = "true"/>
+    <param name="first_camera_namespace" value="cam0"/>
+    <param name="second_camera_namespace" value="cam1"/>
+    <param name="scale" value="1.0"/>
+    <param name="process_every_nth_frame" value="1"/>
+
+    <rosparam file="$(arg camera_calibration_file_path)"/>
+
+    <remap from="raw/first/image" to="/bas_usb_0/image_mono"/>
+    <remap from="raw/second/image" to="/bas_usb_1/image_mono"/>
+
+  </node>
+
+</launch>

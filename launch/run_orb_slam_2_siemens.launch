@@ -1,0 +1,44 @@
+<?xml version="1.0"?>
+<launch>
+
+  <!-- Path of the file containing the ORB vocabulary. -->
+  <arg name="vocabulary_file_path" default = "/home/spadmin/catkin_ws/build/orb_slam_2_catkin/orb_slam_2_src-prefix/src/orb_slam_2_src/Vocabulary/ORBvoc.txt"/>
+  <!-- Path of the file containing ORB SLAM2 configuration. -->
+  <arg name="orb_slam2_settings_file_path" default = "/home/spadmin/calibration/ORB_SLAM2/30cm_2018-08-21.yaml"/>
+
+  <arg name="compressed_topic_1" default="/bas_0/image_color"/>
+  <arg name="compressed_topic_2" default="/bas_1/image_color"/>
+  <arg name="republished_topic_1" default="/bas_0/image_color"/>
+  <arg name="republished_topic_2" default="/bas_1/image_color"/>
+  <arg name="camera_info_1" default="/bas_0/camera_info"/>
+  <arg name="camera_info_2" default="/bas_1/camera_info"/>
+  <!-- ORB SLAM2 stereo. -->
+  <node pkg="orb_slam_2_ros" name="orb_slam_2_ros_node" type="orb_slam_2_ros_node" output="screen">
+
+    <param name="interface_type" value="stereo" />
+
+    <param name="vocabulary_file_path" value="$(arg vocabulary_file_path)"/>
+    <param name="settings_file_path" value="$(arg orb_slam2_settings_file_path)"/>
+    <param name="visualization" type="bool" value="true"/>
+    <remap from="camera/left/image_raw" to="/rect/second/image"/>
+    <remap from="camera/right/image_raw" to="/rect/first/image"/>
+
+  </node>
+
+  <!-- Stereo image rectification. -->
+  <node name="stereo_undistort" pkg="image_undistort" type="stereo_undistort_node">
+    <param name="input_camera_info_from_ros_params" value="false"/>
+    <param name="scale" value="1.0"/>
+    <param name="process_every_nth_frame" value="1"/>
+
+    <remap from="raw/first/image" to="$(arg republished_topic_1)"/>
+    <remap from="raw/first/camera_info" to="$(arg camera_info_1)"/>
+    <remap from="raw/second/image" to="$(arg republished_topic_2)"/>
+    <remap from="raw/second/camera_info" to="$(arg camera_info_2)"/>
+
+  </node>
+
+  <node name="decompressing_node1" pkg="image_transport" type="republish" args="compressed in:=$(arg compressed_topic_1) raw out:=$(arg republished_topic_1)" required="true"/>
+  <node name="decompressing_node2" pkg="image_transport" type="republish" args="compressed in:=$(arg compressed_topic_2) raw out:=$(arg republished_topic_2)" required="true"/>
+
+</launch>
