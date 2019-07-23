@@ -1,0 +1,12 @@
+- git:
+    local-name: catkin_simple
+    uri: git@github.com:catkin/catkin_simple.git
+- git:
+    local-name: orb_slam_2_catkin
+    uri: git@github.com:ethz-asl/orb_slam_2_catkin.git
+- git:
+    local-name: image_undistort
+    uri: https://github.com/ethz-asl/image_undistort.git
+- git:
+    local-name: pangolin_catkin
+    uri: https://github.com/uzh-rpg/pangolin_catkin.git
