@@ -63,9 +63,6 @@ By building the higher level package orb_slam_2_ros you will even compile its de
 
 ## Usage
 
-**PART UNDER REVIEW! DO NOT USE THE FOLLOWING CODE AS IT DOES NOT WORK YET!**
-
-
 Before launching the node with an example dataset you need to:
  - Download a dataset you can use to run this package from [EUROC](https://projects.asl.ethz.ch/datasets/doku.php?id=kmavvisualinertialdatasets) (for example the one called "Machine Hall 001") (containing rosbag to play and camera calibration);
  - Download and extract the [ORB_SLAM2 vocabulary](https://github.com/raulmur/ORB_SLAM2/blob/master/Vocabulary/ORBvoc.txt.tar.gz).
