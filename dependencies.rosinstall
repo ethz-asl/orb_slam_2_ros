@@ -10,3 +10,21 @@
 - git:
     local-name: pangolin_catkin
     uri: https://github.com/uzh-rpg/pangolin_catkin.git
+- git:
+    local-name: glog_catkin
+    uri: https://github.com/ethz-asl/glog_catkin.git
+- git:
+    local-name: minkindr
+    uri: https://github.com/ethz-asl/minkindr.git
+- git:
+    local-name: minkindr_ros
+    uri: https://github.com/ethz-asl/minkindr_ros.git
+- git:
+    local-name: gflags_catkin
+    uri: https://github.com/ethz-asl/gflags_catkin.git
+- git:
+    local-name: eigen_catkin
+    uri: https://github.com/ethz-asl/eigen_catkin.git
+- git:
+    local-name: eigen_checks
+    uri: https://github.com/ethz-asl/eigen_checks.git
