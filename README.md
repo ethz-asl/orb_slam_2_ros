@@ -19,47 +19,39 @@ The orb_slam_2_ros package has been tested under ROS Indigo on Ubuntu 14.04 and 
 
 ## Installation: building from Source
 
-### Dependencies
+Install [Robot Operating System (ROS)](http://wiki.ros.org) (middleware for robotics).
+
 Make sure you have added your SSH keys to your Github account. For more info check [connecting-to-github-with-ssh](https://help.github.com/articles/connecting-to-github-with-ssh/).
 
-- [Robot Operating System (ROS)](http://wiki.ros.org) (middleware for robotics),
-- [catkin_simple](https://github.com/catkin/catkin_simple)
-	```
-	cd ~/catkin_workspace/src
-	git clone git@github.com:catkin/catkin_simple.git # cloning over SSH (github account needed)
-	# git clone https://github.com/catkin/catkin_simple.git # cloning over HTTPS (no github account needed)
-	```
-- [catkinized version of the orb_slam_2](https://github.com/ethz-asl/orb_slam_2_catkin)
-	```
-	cd ~/catkin_workspace/src
-	git clone git@github.com:ethz-asl/orb_slam_2_catkin.git # cloning over SSH (github account needed)
-	# git clone https://github.com/ethz-asl/orb_slam_2_catkin.git # cloning over HTTPS (no github account needed)
-	```
-- [image_undistort](https://github.com/ethz-asl/image_undistort)
-	```
-	cd ~/catkin_workspace/src
-	git clone git@github.com:ethz-asl/image_undistort.git # cloning over SSH (github account needed)
-	# git clone https://github.com/ethz-asl/image_undistort.git # cloning over HTTPS (no github account needed) 
-	```
-- [pangolin_catkin](https://github.com/ethz-asl/pangolin_catkin)
-	```
-	cd ~/catkin_workspace/src
-	git clone git@github.com:uzh-rpg/pangolin_catkin.git # cloning over SSH (github account needed)
-	# git clone https://github.com/uzh-rpg/pangolin_catkin.git # cloning over HTTPS (no github account needed) 
-	```
+Setup and configure a catkin work space.
 
-### Building
+```
+mkdir -p ~/catkin_ws/src
+cd ~/catkin_ws
+catkin init
+catkin config --extend /opt/ros/kinetic
+catkin config --cmake-args -DCMAKE_BUILD_TYPE=Release
+catkin config --merge-devel
+```
+Get this repo
 
-To build from source, clone the latest version from this repository into your catkin workspace and compile the package using
+```
+cd src
+git clone git@github.com:ethz-asl/orb_slam_2_catkin.git
+```
+Get the deps
 
-	cd ~/catkin_workspace/src
-	git clone git@github.com:ethz-asl/orb_slam_2_ros.git # cloning over SSH (github account needed)
-    # git clone https://github.com/ethz-asl/orb_slam_2_ros.git # cloning over HTTPS (no github account needed)
-	cd ../
-	catkin build orb_slam_2_ros
+```
+wstool init
+wstool merge orb_slam_2_ros/dependencies.rosinstall
+wstool update -j8
+```
 
+Build everything
 
-By building the higher level package orb_slam_2_ros you will even compile its dependencies. This includes the compilation of orb_slam_2_catkin, which will **automatically** install the original library ORB_SLAM2 in your system, meaning you **do not need** to do anything else to then use ORB_SLAM2.
+```
+catkin build orb_slam_2_ros
+```
 
 ## Usage
 
